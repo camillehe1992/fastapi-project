@@ -1,4 +1,4 @@
-from config.database import Base, engine
+from db.base import Base, engine
 from db.models import Item, Album, Photo, User, Post
 
 

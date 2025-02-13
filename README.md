@@ -5,30 +5,25 @@ This is a FastAPI project that demonstrates how to build a RESTful API using Fas
 ## Project Structure
 
 ```bash
-fastapi-project/
-├── app/
-│   ├── __init__.py
-│   ├── main.py              # Main FastAPI application
-│   ├── api/                 # API routes
-│   │   ├── __init__.py
-│   │   └── v1/              # Versioned API endpoints
-│   │       ├── __init__.py
-│   │       ├── endpoints/   # Endpoint definitions
-│   │       └── models.py    # Pydantic models
-│   ├── core/                # Core application logic
-│   │   ├── __init__.py
-│   │   └── config.py        # Configuration settings
-│   └── db/                  # Database-related files
-│       ├── __init__.py
-│       └── session.py       # Database session management
-├── tests/                   # Unit and integration tests
-│   ├── __init__.py
+.
+├── app
+│   ├── api
+│   ├── config
+│   ├── core
+│   ├── db
+│   ├── schemas
+│   ├── utils
+│   └── main.py
+├── tests
+│   ├── test_api
 │   └── test_main.py
-├── requirements.txt         # Python dependencies
-├── Dockerfile               # Docker configuration
-├── docker-compose.yaml       # Docker Compose configuration
-├── .env                     # Environment variables
-└── README.md                # Project documentation
+├── .gitignore
+├── Dockerfile
+├── LICENSE
+├── README.md
+├── docker-compose.yaml
+├── requirements-dev.txt
+└── requirements.txt
 ```
 
 ## Features

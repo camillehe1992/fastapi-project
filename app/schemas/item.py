@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, UUID4
 
 
 class ItemCreate(BaseModel):
@@ -7,6 +7,6 @@ class ItemCreate(BaseModel):
 
 
 class ItemResponse(BaseModel):
-    id: int
+    id: UUID4
     name: str
     description: str
