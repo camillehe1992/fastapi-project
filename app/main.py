@@ -27,10 +27,4 @@ if settings.DEBUG:
 else:
     origins = [str(origin).strip(",") for origin in settings.ORIGINS]
 
-
-@app.get("/")
-def read_root():
-    return {"message": "Hello, World!"}
-
-
 app.include_router(router)

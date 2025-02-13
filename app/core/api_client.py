@@ -28,11 +28,3 @@ class ApiClient:
         except requests.RequestException as e:
             print(f"Request failed: {e}")
             return None
-
-
-# Example usage (not inside the module)
-if __name__ == "__main__":
-    client = ApiClient()
-    data = client.get("/posts/1")
-    if data:
-        print(data)

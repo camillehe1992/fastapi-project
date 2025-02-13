@@ -1,6 +1,9 @@
 fastapi==0.115.8
 uvicorn[standard]==0.34.0
 SQLAlchemy==2.0.38
+python-jose==3.3.0
+python-multipart==0.0.20
+passlib==1.7.4
 python-dotenv
 pydantic
 pydantic-settings

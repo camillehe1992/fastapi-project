@@ -73,7 +73,7 @@ DEBUG=True
 Start the FastAPI app using `uvicorn`:
 
 ```bash
-uvicorn app.main:app --reload
+PYTHONPATH=app uvicorn main:app --reload
 ```
 
 The app will be available at <http://localhost:8000>.

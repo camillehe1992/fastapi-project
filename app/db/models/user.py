@@ -1,16 +1,12 @@
-from uuid import UUID
+from pydantic import BaseModel, UUID4
 from typing import Optional
-
-from pydantic import BaseModel, Field
 
 
 class UserBase(BaseModel):
     email: str
     username: str
-    is_superuser: bool = Field(
-        False, description="Whether the user has admin privileges"
-    )
-    is_active: bool = Field(True, description="Whether the user is active")
+    is_superuser: bool = False
+    is_active: bool = True
 
 
 class UserIn(UserBase):
@@ -18,7 +14,7 @@ class UserIn(UserBase):
 
 
 class UserInDBBase(UserBase):
-    id: UUID
+    id: UUID4
 
     class Config:
         orm_mode = True
