@@ -1,6 +1,15 @@
 import uuid
 
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    Text,
+    ForeignKey,
+    DateTime,
+    func,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -13,6 +22,8 @@ class Item(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, index=True)
     description = Column(String)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
 
 class User(Base):
@@ -63,3 +74,14 @@ class Photo(Base):
     album_id = Column(Integer, ForeignKey("albums.id"), nullable=False)
 
     album = relationship("Album", back_populates="photos")
+
+
+class Todo(Base):
+    __tablename__ = "todos"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    title = Column(String, index=True, nullable=False)
+    description = Column(String, nullable=True)
+    completed = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

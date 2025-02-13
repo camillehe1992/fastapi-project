@@ -3,7 +3,7 @@ from fastapi import FastAPI
 
 from core.settings import settings
 from routers.api import router
-from utils.init_db import create_tables
+from db.utils import create_tables
 
 
 # Lifespan function to initialize the database

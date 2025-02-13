@@ -12,3 +12,15 @@ def create_tables():
     Photo.metadata.create_all(bind=engine)
     User.metadata.create_all(bind=engine)
     Post.metadata.create_all(bind=engine)
+
+
+def drop_tables():
+    """
+    Drops all database tables defined in the application.
+    """
+    Base.metadata.drop_all(bind=engine)
+    Album.metadata.drop_all(bind=engine)
+    Photo.metadata.drop_all(bind=engine)
+    Post.metadata.drop_all(bind=engine)
+    User.metadata.drop_all(bind=engine)
+    Item.metadata.drop_all(bind=engine)
