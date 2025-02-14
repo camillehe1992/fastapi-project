@@ -1,14 +1,13 @@
 from datetime import timedelta
 
 from fastapi import HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from core.security import get_password_hash, pwd_context, create_access_token
 from config.settings import settings
 from repositories.user_repository import UserRepository
-from schemas.user import UserIn, UserInDBBase
+from schemas.user import UserIn, UserLogin, UserInDBBase
 from core.password_validator import validate_password
 from core.email_validator import validate_email
 
@@ -49,12 +48,12 @@ class UserService:
         user = self.repository.create(data, hashed_password)
         return user
 
-    def login(self, data: OAuth2PasswordRequestForm):
+    def login(self, data: UserLogin):
         """
         User login.
 
         Args:
-            data (OAuth2PasswordRequestForm): Login form data.
+            data (UserLogin): Login data with username and password.
 
         Returns:
             dict: Token response.

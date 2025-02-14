@@ -17,7 +17,7 @@ class UserInDBBase(UserBase):
     id: UUID4
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserInDB(UserInDBBase):

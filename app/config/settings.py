@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     DEBUG: Optional[bool] = os.getenv("DEBUG", "True") == "True"
     # Title is the name of application
     TITLE: Optional[str] = os.getenv("TITLE", "RestAPI")
+    # Project version
+    VERSION: Optional[str] = os.getenv("VERSION", "1.0.0")
     # SQLITE connection string
     SQLITE_CONNECTION_STRING: Optional[str] = os.getenv(
         "SQLITE_CONNECTION_STRING", "sqlite:///sqlite.db"

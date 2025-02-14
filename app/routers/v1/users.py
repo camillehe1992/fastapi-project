@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from core.auth import get_current_user
 from db.base import get_db
-from schemas.user import UserIn, UserInDBBase
+from schemas.user import UserIn, UserLogin, UserInDBBase, Token, UserBase
 from services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -26,15 +25,13 @@ def register(data: UserIn, session: Session = Depends(get_db)):
     return _service.create(data)
 
 
-@router.post("/login", status_code=201)
-def login(
-    data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_db)
-):
+@router.post("/login", status_code=201, response_model=Token)
+def login(data: UserLogin, session: Session = Depends(get_db)):
     """
     Login user.
 
     Args:
-        data (OAuth2PasswordRequestForm): User credentials.
+        data (UserLogin): Login data with username and password.
         session (Session): Database session.
 
     Returns:
@@ -44,7 +41,7 @@ def login(
     return _service.login(data)
 
 
-@router.get("/me", status_code=200)
+@router.get("/me", status_code=200, response_model=UserBase)
 def get_me(user: UserIn = Depends(get_current_user)):
     """
     Retrieve information of the authenticated user.

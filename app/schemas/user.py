@@ -5,12 +5,17 @@ from pydantic import BaseModel, Field
 
 
 class UserBase(BaseModel):
-    email: str
-    username: str
+    email: str = Field(examples=["john.doe@example.com"])
+    username: str = Field(examples=["John Doe"])
     is_superuser: bool = Field(
         False, description="Whether the user has admin privileges"
     )
     is_active: bool = Field(True, description="Whether the user is active")
+
+
+class UserLogin(BaseModel):
+    username: str = Field(examples=["John Doe"])
+    password: str
 
 
 class UserIn(UserBase):
@@ -21,7 +26,7 @@ class UserInDBBase(UserBase):
     id: UUID
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserInDB(UserInDBBase):

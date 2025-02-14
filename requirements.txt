@@ -9,3 +9,4 @@ pydantic
 pydantic-settings
 psycopg2-binary
 requests
+bcrypt==4.2.1
