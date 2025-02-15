@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 from config.settings import settings
 from config.openapi import custom_openapi
-from middlewares.logging import log_requests_middleware
+from middlewares import log_requests_middleware, add_cors_middleware
 from routers.api import router
 from exception_handlers import global_exception_handler
 from lifespan import lifespan
@@ -12,13 +12,9 @@ app = FastAPI(
     debug=bool(settings.DEBUG),
 )
 
-# Add the middleware to the app
+# Add middlewares to the app
 app.middleware("http")(log_requests_middleware)
-
-if settings.DEBUG:
-    origins = ["*"]
-else:
-    origins = [str(origin).strip(",") for origin in settings.ORIGINS]
+add_cors_middleware(app)
 
 # Assign the custom OpenAPI schema to the app
 # Use lambda to make sure the swagger ui is rendered dynamically
