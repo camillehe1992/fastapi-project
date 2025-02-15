@@ -20,11 +20,8 @@ This is a FastAPI project that demonstrates how to build a RESTful API using Fas
 │   ├── lifespan.py
 │   └── main.py
 ├── tests
-│   ├── test_api
-│   └── test_main.py
 ├── .gitignore
 ├── Dockerfile
-├── LICENSE
 ├── README.md
 ├── docker-compose.yaml
 ├── pytest.ini
@@ -168,6 +165,9 @@ FastAPI automatically generates interactive API documentation:
 Run the tests using `pytest`:
 
 ```bash
+# Activate virtual environment
+source venv/bin/activate
+
 # Install dev dependencies in virtual environment
 pip install -r requirements-dev.txt
 

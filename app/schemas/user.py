@@ -30,7 +30,7 @@ class UserIn(UserBase):
 class UserInDBBase(UserBase):
     id: UUID4
 
-    class Config:
+    class ConfigDict:
         from_attributes = True
 
 
