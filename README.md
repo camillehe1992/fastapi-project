@@ -7,12 +7,17 @@ This is a FastAPI project that demonstrates how to build a RESTful API using Fas
 ```bash
 .
 ├── app
-│   ├── api
 │   ├── config
 │   ├── core
 │   ├── db
+│   ├── middlewares
+│   ├── repositories
+│   ├── routers
 │   ├── schemas
+│   ├── services
 │   ├── utils
+│   ├── exception_handlers.py
+│   ├── lifespan.py
 │   └── main.py
 ├── tests
 │   ├── test_api
@@ -22,23 +27,32 @@ This is a FastAPI project that demonstrates how to build a RESTful API using Fas
 ├── LICENSE
 ├── README.md
 ├── docker-compose.yaml
+├── pytest.ini
 ├── requirements-dev.txt
 └── requirements.txt
 ```
 
 ## Features
 
-- **FastAPI**: A modern, fast (high-performance) web framework for building APIs with Python 3.7+.
+- **FastAPI**: A modern, fast (high-performance) web framework for building APIs with Python 3.11+.
 - **Pydantic**: Data validation and settings management using Python type annotations.
 - **SQLAlchemy**: ORM for database interactions.
 - **Docker**: Containerization for easy deployment and development.
 - **Testing**: Includes unit and integration tests.
 
+Available functionalities:
+
+- Authentication
+- Multiple Layers
+- Middlewares
+- Centeralized Logging
+- OpenAPI
+
 ## Prerequisites
 
 Before running the project, ensure you have the following installed:
 
-- Python 3.7+
+- Python 3.11+
 - Docker (optional, for containerized deployment)
 - Docker Compose (optional, for multi-container setup)
 
