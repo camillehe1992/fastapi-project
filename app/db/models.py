@@ -2,7 +2,6 @@ import uuid
 
 from sqlalchemy import (
     Column,
-    Integer,
     String,
     Boolean,
     Text,
@@ -15,15 +14,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 Base = declarative_base()
-
-
-class Item(Base):
-    __tablename__ = "items"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String, index=True)
-    description = Column(String)
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
 
 class User(Base):
@@ -40,6 +30,17 @@ class User(Base):
 
     posts = relationship("Post", back_populates="user")
     albums = relationship("Album", back_populates="user")
+
+
+class Todo(Base):
+    __tablename__ = "todos"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    title = Column(String, index=True, nullable=False)
+    completed = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
 
 class Post(Base):
@@ -79,12 +80,10 @@ class Photo(Base):
     album = relationship("Album", back_populates="photos")
 
 
-class Todo(Base):
-    __tablename__ = "todos"
-
+class Item(Base):
+    __tablename__ = "items"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    title = Column(String, index=True, nullable=False)
-    completed = Column(Boolean, default=False)
+    name = Column(String, index=True)
+    description = Column(String)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

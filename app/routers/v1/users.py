@@ -43,7 +43,9 @@ def login(data: UserLogin, session: Session = Depends(get_db)):
     return _service.login(data)
 
 
-@router.get("/me", status_code=status.HTTP_200_OK, response_model=UserBase)
+@router.get(
+    "/me", status_code=status.HTTP_200_OK, response_model=UserBase, deprecated=True
+)
 def get_me(user: UserIn = Depends(get_current_user)):
     """
     Retrieve information of the authenticated user.
@@ -57,7 +59,7 @@ def get_me(user: UserIn = Depends(get_current_user)):
     return user
 
 
-@router.delete("/me", status_code=status.HTTP_200_OK)
+@router.delete("/me", status_code=status.HTTP_200_OK, deprecated=True)
 def delete_me(
     user: UserIn = Depends(get_current_user), session: Session = Depends(get_db)
 ):

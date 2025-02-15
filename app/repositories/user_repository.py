@@ -139,6 +139,21 @@ class UserRepository:
             is not None
         )
 
+    def inactive_user(self, user: Type[User]) -> bool:
+        """
+        De-register a user.
+
+        Args:
+            user (Type[User]): The user instance.
+
+        Returns:
+            bool: True if deletion was successful, False otherwise.
+        """
+        user.is_active = False
+        self.session.commit()
+        self.session.refresh(user)
+        return True
+
     def delete_user(self, user: Type[User]) -> bool:
         """
         Delete a user.
@@ -149,9 +164,6 @@ class UserRepository:
         Returns:
             bool: True if deletion was successful, False otherwise.
         """
-        # self.session.delete(user)
-        # We set is_active as False to de-register a active user instead of removing from database.
-        user.is_active = False
+        self.session.delete(user)
         self.session.commit()
-        self.session.refresh(user)
         return True

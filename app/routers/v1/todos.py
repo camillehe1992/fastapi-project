@@ -3,7 +3,7 @@ from fastapi import APIRouter, status, Depends, Query
 from sqlalchemy.orm import Session
 
 from schemas.todo import TodoInput, TodoOutput, TodoList
-from schemas.user import UserIn
+from schemas.user import UserInDBBase
 from services.todo_service import TodoService
 from db.base import get_db
 from core.auth import get_current_user
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/todos", tags=["todos"])
 def create_new_todo(
     data: TodoInput,
     session: Session = Depends(get_db),
-    current_user: UserIn = Depends(get_current_user),
+    current_user: UserInDBBase = Depends(get_current_user),
 ):
     data.user_id = current_user.id
     _service = TodoService(session)
@@ -40,12 +40,21 @@ def get_todo_details(_id: UUID4, session: Session = Depends(get_db)):
 
 
 @router.delete("/{_id}", status_code=status.HTTP_200_OK)
-def delete_todo(_id: UUID4, session: Session = Depends(get_db)):
+def delete_todo(
+    _id: UUID4,
+    session: Session = Depends(get_db),
+    current_user: UserInDBBase = Depends(get_current_user),
+):
     deleted_todo = TodoService(session).delete(_id)
     return {"message": "Item deleted successfully", "deleted_todo": deleted_todo}
 
 
 @router.put("/{_id}", status_code=status.HTTP_200_OK, response_model=TodoOutput)
-def update_todo(_id: UUID4, data: TodoInput, session: Session = Depends(get_db)):
+def update_todo(
+    _id: UUID4,
+    data: TodoInput,
+    session: Session = Depends(get_db),
+    current_user: UserInDBBase = Depends(get_current_user),
+):
     _service = TodoService(session)
     return _service.update(_id, data)
