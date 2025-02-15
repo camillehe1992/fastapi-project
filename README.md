@@ -43,10 +43,30 @@ This is a FastAPI project that demonstrates how to build a RESTful API using Fas
 Available functionalities:
 
 - Authentication
-- Multiple Layers
+- Layered Architecture
 - Middlewares
-- Centeralized Logging
-- OpenAPI
+- Centralized Logging
+- Swagger IU (OpenAPI)
+
+Below is a diagram that illustrates the relationship between FastAPI `routers`, `services`, and `repositories` in a typical layered architecture.
+
+```bash
++-------------------+       +-------------------+       +-------------------+
+|                   |       |                   |       |                   |
+|   FastAPI Router  | ----> |     Service       | ----> |   Repository      |
+|   (Controller)    |       |   (Business Logic)|       |   (Data Access)   |
+|                   |       |                   |       |                   |
++-------------------+       +-------------------+       +-------------------+
+        |                           |                           |
+        |                           |                           |
+        v                           v                           v
++-------------------+       +-------------------+       +-------------------+
+|                   |       |                   |       |                   |
+|   HTTP Requests   |       |   Business Rules  |       |   Database/ORM    |
+|   (API Endpoints) |       |   (Validation,    |       |   (SQLAlchemy,    |
+|                   |       |   Transformations)|       |   Raw SQL, etc.)  |
++-------------------+       +-------------------+       +-------------------+
+```
 
 ## Prerequisites
 
@@ -100,8 +120,8 @@ pip install -r requirements.txt
 Create a `.env` file in the root directory and add the following variables:
 
 ```bash
-DATABASE_URL=sqlite:///./test.db
 DEBUG=True
+SQLITE_CONNECTION_STRING=sqlite:///./test.db
 ```
 
 ### 4. Run the Application
@@ -113,6 +133,9 @@ PYTHONPATH=app uvicorn main:app --reload
 ```
 
 The app will be available at <http://localhost:8000>.
+
+- Swagger UI <http://localhost:8000/docs>
+- ReDoc <http://localhost:8000/redoc>
 
 ## Running with Docker
 
