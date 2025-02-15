@@ -134,9 +134,6 @@ PYTHONPATH=app uvicorn main:app --reload
 
 The app will be available at <http://localhost:8000>.
 
-- Swagger UI <http://localhost:8000/docs>
-- ReDoc <http://localhost:8000/redoc>
-
 ## Running with Docker
 
 ### 1. Build the Docker Image
