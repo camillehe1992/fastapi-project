@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     VERSION: Optional[str] = os.getenv("VERSION", "1.0.0")
     # Project nickname
     NICKNAME: Optional[str] = os.getenv("NICKNAME", "fastapi")
+    #
     # SQLITE connection string
     SQLITE_CONNECTION_STRING: Optional[str] = os.getenv(
         "SQLITE_CONNECTION_STRING", "sqlite:///sqlite.db"
