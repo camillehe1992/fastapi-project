@@ -1,7 +1,6 @@
-from uuid import UUID
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, UUID4, Field
 
 
 class UserBase(BaseModel):
@@ -29,7 +28,7 @@ class UserIn(UserBase):
 
 
 class UserInDBBase(UserBase):
-    id: UUID
+    id: UUID4
 
     class Config:
         from_attributes = True

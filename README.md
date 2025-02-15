@@ -48,7 +48,7 @@ Before running the project, ensure you have the following installed:
 [
   {
     "username": "John Doe",
-    "password": "Mypassword@123",
+    "password": "Password@123",
     "email": "john.doe@example.com"
   },
   {

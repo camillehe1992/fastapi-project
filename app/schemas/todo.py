@@ -1,8 +1,7 @@
-from uuid import UUID
 from typing import List, Any, Optional
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, UUID4, Field
 
 
 class TodoInput(BaseModel):
@@ -17,10 +16,14 @@ class TodoInput(BaseModel):
     completed: bool = Field(
         False, description="Whether the todo item is completed or not"
     )
+    # user_id is set to None, and it's defined as Optional
+    # because user_id is assigned on the app site not from client
+    user_id: Optional[UUID4] = None
 
 
 class TodoOutput(BaseModel):
-    id: UUID
+    id: UUID4
+    user_id: UUID4
     title: str
     description: Optional[str] = Field(
         None, description="Optional description of the todo item"

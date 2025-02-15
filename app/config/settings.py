@@ -28,9 +28,9 @@ class Settings(BaseSettings):
     )
     # JWT
     SECRET_KEY: Optional[str] = os.getenv("SECRET_KEY")
-    ALGORITHM: Optional[str] = os.getenv("ALGORITHM")
+    ALGORITHM: Optional[str] = os.getenv("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: Optional[int] = int(
-        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60)
+        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 3600)
     )
     # Origins
     ORIGINS: Optional[str] = os.getenv("ORIGINS", "")

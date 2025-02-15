@@ -87,7 +87,9 @@ class UserService:
             bool: True if the user is a superuser, False otherwise.
         """
         if not self.repository.user_exists_by_id(_id):
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"User {_id} not found"
+            )
 
         user = self.repository.get_user_object_by_id(_id)
         return user.is_superuser
@@ -103,7 +105,9 @@ class UserService:
             bool: True if the user is successfully deleted, False otherwise.
         """
         if not self.repository.user_exists_by_id(_id):
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"User {_id} not found"
+            )
 
         user = self.repository.get_user_object_by_id(_id)
         self.repository.delete_user(user)

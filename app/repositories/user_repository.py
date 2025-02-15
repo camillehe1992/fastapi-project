@@ -50,7 +50,12 @@ class UserRepository:
         Returns:
             bool: True if the user exists, False otherwise.
         """
-        return self.session.query(User).filter(User.email == email).first() is not None
+        return (
+            self.session.query(User)
+            .filter(User.email == email, User.is_active == True)
+            .first()
+            is not None
+        )
 
     def user_exists_by_username(self, username: str) -> bool:
         """
@@ -63,7 +68,9 @@ class UserRepository:
             bool: True if the user exists, False otherwise.
         """
         return (
-            self.session.query(User).filter(User.username == username).first()
+            self.session.query(User)
+            .filter(User.username == username, User.is_active == True)
+            .first()
             is not None
         )
 
@@ -77,7 +84,11 @@ class UserRepository:
         Returns:
             User: The user.
         """
-        return self.session.query(User).filter(User.email == email).first()
+        return (
+            self.session.query(User)
+            .filter(User.email == email, User.is_active == True)
+            .first()
+        )
 
     def get_user_by_username(self, username: str):
         """
@@ -89,7 +100,11 @@ class UserRepository:
         Returns:
             User: The user.
         """
-        return self.session.query(User).filter(User.username == username).first()
+        return (
+            self.session.query(User)
+            .filter(User.username == username, User.is_active == True)
+            .first()
+        )
 
     def get_user_object_by_id(self, _id: UUID4) -> Type[User]:
         """
@@ -101,7 +116,11 @@ class UserRepository:
         Returns:
             Type[User]: The user instance.
         """
-        return self.session.query(User).filter(User.id == _id).first()
+        return (
+            self.session.query(User)
+            .filter(User.id == _id, User.is_active == True)
+            .first()
+        )
 
     def user_exists_by_id(self, _id: UUID4) -> bool:
         """
@@ -113,7 +132,12 @@ class UserRepository:
         Returns:
             bool: True if the user exists, False otherwise.
         """
-        return self.session.query(User).filter(User.id == _id).first() is not None
+        return (
+            self.session.query(User)
+            .filter(User.id == _id, User.is_active == True)
+            .first()
+            is not None
+        )
 
     def delete_user(self, user: Type[User]) -> bool:
         """
@@ -125,6 +149,9 @@ class UserRepository:
         Returns:
             bool: True if deletion was successful, False otherwise.
         """
-        self.session.delete(user)
+        # self.session.delete(user)
+        # We set is_active as False to de-register a active user instead of removing from database.
+        user.is_active = False
         self.session.commit()
+        self.session.refresh(user)
         return True

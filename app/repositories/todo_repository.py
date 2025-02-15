@@ -3,7 +3,7 @@ from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from db.models import Todo
-from schemas.todo import TodoInput, TodoOutput, TodoList
+from schemas.todo import TodoInput, TodoList, TodoOutput
 
 
 class TodoRepository:

@@ -48,7 +48,7 @@ class Post(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = Column(String, index=True, nullable=False)
     body = Column(Text, nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(UUID, ForeignKey("users.id"), nullable=False)
 
     user = relationship("User", back_populates="posts")
 
@@ -58,7 +58,7 @@ class Album(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = Column(String, index=True, nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(UUID, ForeignKey("users.id"), nullable=False)
 
     user = relationship("User", back_populates="albums")
     photos = relationship(
@@ -74,7 +74,7 @@ class Photo(Base):
     title = Column(String, index=True, nullable=False)
     url = Column(String, nullable=False)
     thumbnailUrl = Column(String, nullable=False)
-    album_id = Column(Integer, ForeignKey("albums.id"), nullable=False)
+    album_id = Column(UUID, ForeignKey("albums.id"), nullable=False)
 
     album = relationship("Album", back_populates="photos")
 
@@ -83,6 +83,7 @@ class Todo(Base):
     __tablename__ = "todos"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     title = Column(String, index=True, nullable=False)
     description = Column(String, nullable=True)
     completed = Column(Boolean, default=False)

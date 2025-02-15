@@ -4,14 +4,22 @@ from pydantic import UUID4
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from services.user_service import UserService
+from schemas.todo import TodoInput, TodoOutput
 from repositories.todo_repository import TodoRepository
 
 
 class TodoService:
     def __init__(self, session: Session):
         self.repository = TodoRepository(session)
+        self.user_service = UserService(session)
 
-    def create(self, data: Dict) -> Dict[str, Any]:
+    def create(self, data: TodoInput) -> TodoOutput:
+        if not self.user_service.is_superuser(data.user_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden"
+            )
+
         return self.repository.create(data)
 
     def get_all(self, page: int = 1, page_size: int = 15) -> Dict[str, Any]:
