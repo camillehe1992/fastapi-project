@@ -1,8 +1,8 @@
-from typing import List, Dict, Any
-
+from typing import Dict, Any
 from fastapi import HTTPException
 from pydantic import UUID4
 from sqlalchemy.orm import Session
+
 from repositories.item_repository import ItemRepository
 from schemas.item import ItemInput, ItemResponse
 

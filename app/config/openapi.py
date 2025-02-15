@@ -11,7 +11,7 @@ def custom_openapi(app):
     openapi_schema = get_openapi(
         title=settings.TITLE,
         version=settings.VERSION,
-        description="A Swagger for FaskAPI Application",
+        description="A Swagger for FastAPI Application",
         routes=app.routes,
     )
 

@@ -6,9 +6,13 @@ from pydantic import BaseModel, Field
 
 
 class TodoInput(BaseModel):
-    title: str
+    title: str = Field(
+        None, description="Required title of the todo item", examples=["Watch a movie"]
+    )
     description: Optional[str] = Field(
-        None, description="Optional description of the todo item"
+        None,
+        description="Optional description of the todo item",
+        examples=["Watch a movie at Sunday with friends"],
     )
     completed: bool = Field(
         False, description="Whether the todo item is completed or not"
