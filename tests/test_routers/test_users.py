@@ -1,7 +1,6 @@
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.core.auth import get_current_user
 from tests.conftest import test_db
 
 client = TestClient(app)
@@ -9,61 +8,67 @@ client = TestClient(app)
 PREFIX = "api/v1/users"
 
 
-def mock_get_current_user():
-    return {
-        "username": "John Doe",
-        "email": "john.doe@example.com",
-        "password": "Mypassword@123",
-    }
+def test_user_register(client, test_db):
+    response = client.post(
+        f"{PREFIX}/register",
+        json={
+            "username": "John Doe",
+            "email": "john.doe@example.com",
+            "password": "Mypassword@123",
+        },
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["username"] == "John Doe"
+    assert data["email"] == "john.doe@example.com"
+    assert "id" in data
 
 
-app.dependency_overrides[get_current_user] = mock_get_current_user
-
-# Test cases
-# def test_user_register(client, test_db):
-#     response = client.post(
-#         f"{PREFIX}/register",
-#         json={
-#             "username": "John Doe",
-#             "email": "john.doe@example.com",
-#             "password": "Mypassword@123",
-#         },
-#     )
-#     assert response.status_code == 201
-#     data = response.json()
-#     assert data["username"] == "John Doe"
-#     assert data["email"] == "john.doe@example.com"
-#     assert "id" in data
+def test_user_login(client, test_db):
+    response = client.post(
+        f"{PREFIX}/login",
+        json={
+            "username": "John Doe",
+            "password": "Mypassword@123",
+        },
+    )
+    assert response.status_code == 200
+    token = response.json()
+    assert len(token["access_token"]) > 0
+    assert token["token_type"] == "bearer"
 
 
 def test_get_me(client, test_db):
-    headers = {"Authorization": f"Bearer fake-token"}
+    login_response = client.post(
+        f"{PREFIX}/login",
+        json={
+            "username": "John Doe",
+            "password": "Mypassword@123",
+        },
+    )
+    assert login_response.status_code == 200
+
+    access_token = login_response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {access_token}"}
     response = client.get(f"{PREFIX}/me", headers=headers)
-    print(response.json())
     assert response.status_code == 200
-    me = response.json()
-    assert me["username"] == "John Doe"
-    assert me["email"] == "john.doe@example.com"
+    current_user = response.json()
+    assert current_user["username"] == "John Doe"
+    assert current_user["email"] == "john.doe@example.com"
 
 
-# def test_read_user(client, test_db):
-#     # Create a user first
-#     response = client.post(
-#         f"{PREFIX}/users",
-#         json={"name": "Alice", "email": "alice@example.com"},
-#     )
-#     user_id = response.json()["id"]
+def test_delete_me(client, test_db):
+    login_response = client.post(
+        f"{PREFIX}/login",
+        json={
+            "username": "John Doe",
+            "password": "Mypassword@123",
+        },
+    )
+    assert login_response.status_code == 200
 
-#     response = client.get(f"/users/{user_id}")
-#     assert response.status_code == 200
-#     data = response.json()
-#     assert data["name"] == "Alice"
-#     assert data["email"] == "alice@example.com"
-
-
-# def test_read_user_not_found(client, test_db):
-#     response = client.get(
-#         f"{PREFIX}/users/123",
-#     )
-#     assert response.status_code == 404
-#     assert response.json() == {"detail": "User not found"}
+    access_token = login_response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = client.delete(f"{PREFIX}/me", headers=headers)
+    assert response.status_code == 200
+    assert response.json() == True

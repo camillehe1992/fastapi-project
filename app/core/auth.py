@@ -41,12 +41,12 @@ async def get_current_user(
     Returns:
         User: The current user.
     """
-    if token == "fake-token":
-        return {
-            "username": "John Doe",
-            "email": "john.doe@example.com",
-            "password": "Mypassword@123",
-        }
+    # if token == "fake-token":
+    #     return {
+    #         "username": "John Doe",
+    #         "email": "john.doe@example.com",
+    #         "password": "Mypassword@123",
+    #     }
 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

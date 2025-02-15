@@ -27,7 +27,7 @@ def register(data: UserRegister, session: Session = Depends(get_db)):
     return _service.create(data)
 
 
-@router.post("/login", status_code=status.HTTP_201_CREATED, response_model=Token)
+@router.post("/login", status_code=status.HTTP_200_OK, response_model=Token)
 def login(data: UserLogin, session: Session = Depends(get_db)):
     """
     Login user.
