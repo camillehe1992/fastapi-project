@@ -42,6 +42,28 @@ Before running the project, ensure you have the following installed:
 - Docker (optional, for containerized deployment)
 - Docker Compose (optional, for multi-container setup)
 
+## Test Users
+
+```bash
+[
+  {
+    "username": "John Doe",
+    "password": "Mypassword@123",
+    "email": "john.doe@example.com"
+  },
+  {
+    "username": "Jane Smith",
+    "password": "P@ssw0rd456",
+    "email": "jane.smith@example.com"
+  },
+  {
+    "username": "Alice Wonder",
+    "password": "Wonderland!789",
+    "email": "alice.wonder@example.com"
+  }
+]
+```
+
 ## Setup Instructions
 
 ### 1. Clone the Repository

@@ -13,8 +13,14 @@ class UserBase(BaseModel):
     is_active: bool = Field(True, description="Whether the user is active")
 
 
+class UserRegister(BaseModel):
+    email: str
+    username: str
+    password: str
+
+
 class UserLogin(BaseModel):
-    username: str = Field(examples=["John Doe"])
+    username: str
     password: str
 
 

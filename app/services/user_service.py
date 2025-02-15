@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
@@ -37,16 +37,21 @@ class UserService:
             UserInDBBase: Created user data.
         """
         if self.repository.user_exists_by_email(data.email):
-            raise HTTPException(status_code=400, detail="Email already registered")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Email {data.email} already registered",
+            )
         if self.repository.user_exists_by_username(data.username):
-            raise HTTPException(status_code=400, detail="Username already registered")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Username {data.username} already registered",
+            )
 
         validate_password(data.password)
         validate_email(data.email)
 
         hashed_password = get_password_hash(data.password)
-        user = self.repository.create(data, hashed_password)
-        return user
+        return self.repository.create(data, hashed_password)
 
     def login(self, data: UserLogin):
         """

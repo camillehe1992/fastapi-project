@@ -1,16 +1,18 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from core.auth import get_current_user
 from db.base import get_db
-from schemas.user import UserIn, UserLogin, UserInDBBase, Token, UserBase
+from schemas.user import UserIn, UserLogin, UserRegister, UserInDBBase, Token, UserBase
 from services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.post("/register", status_code=201, response_model=UserInDBBase)
-def register(data: UserIn, session: Session = Depends(get_db)):
+@router.post(
+    "/register", status_code=status.HTTP_201_CREATED, response_model=UserInDBBase
+)
+def register(data: UserRegister, session: Session = Depends(get_db)):
     """
     Register a new user.
 
@@ -25,7 +27,7 @@ def register(data: UserIn, session: Session = Depends(get_db)):
     return _service.create(data)
 
 
-@router.post("/login", status_code=201, response_model=Token)
+@router.post("/login", status_code=status.HTTP_201_CREATED, response_model=Token)
 def login(data: UserLogin, session: Session = Depends(get_db)):
     """
     Login user.
@@ -41,7 +43,7 @@ def login(data: UserLogin, session: Session = Depends(get_db)):
     return _service.login(data)
 
 
-@router.get("/me", status_code=200, response_model=UserBase)
+@router.get("/me", status_code=status.HTTP_200_OK, response_model=UserBase)
 def get_me(user: UserIn = Depends(get_current_user)):
     """
     Retrieve information of the authenticated user.
@@ -55,7 +57,7 @@ def get_me(user: UserIn = Depends(get_current_user)):
     return user
 
 
-@router.delete("/me", status_code=204)
+@router.delete("/me", status_code=status.HTTP_200_OK)
 def delete_me(
     user: UserIn = Depends(get_current_user), session: Session = Depends(get_db)
 ):
