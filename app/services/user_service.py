@@ -1,5 +1,4 @@
 from datetime import timedelta
-
 from fastapi import HTTPException, status
 from pydantic import UUID4
 from sqlalchemy.orm import Session
@@ -7,7 +6,7 @@ from sqlalchemy.orm import Session
 from core.security import get_password_hash, pwd_context, create_access_token
 from config.settings import settings
 from repositories.user_repository import UserRepository
-from schemas.user import UserIn, UserLogin, UserInDBBase
+from schemas.user import UserRegister, UserLogin, UserInDBBase
 from core.password_validator import validate_password
 from core.email_validator import validate_email
 
@@ -26,12 +25,12 @@ class UserService:
         """
         self.repository = UserRepository(session)
 
-    def create(self, data: UserIn) -> UserInDBBase:
+    def create(self, data: UserRegister) -> UserInDBBase:
         """
         Create a new user.
 
         Args:
-            data (UserIn): User data.
+            data (UserRegister): User data.
 
         Returns:
             UserInDBBase: Created user data.
@@ -66,7 +65,7 @@ class UserService:
         user = self.repository.get_user_by_username(data.username)
         if not user or not pwd_context.verify(data.password, user.hashed_password):
             raise HTTPException(
-                status_code=401,
+                status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect username or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )

@@ -4,7 +4,7 @@ from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from db.models import User
-from schemas.user import UserIn, UserInDBBase
+from schemas.user import UserIn, UserInDBBase, UserInDB
 
 
 class UserRepository:
@@ -90,7 +90,7 @@ class UserRepository:
             .first()
         )
 
-    def get_user_by_username(self, username: str):
+    def get_user_by_username(self, username: str) -> UserInDB:
         """
         Get a user by username.
 
