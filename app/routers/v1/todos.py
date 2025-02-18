@@ -2,6 +2,7 @@ from pydantic import UUID4
 from fastapi import APIRouter, status, Depends, Query
 from sqlalchemy.orm import Session
 
+from schemas.response import CommonResponse
 from schemas.todo import TodoInput, TodoOutput, TodoList
 from schemas.user import UserInDBBase
 from services.todo_service import TodoService
@@ -11,7 +12,9 @@ from core.auth import get_current_user
 router = APIRouter(prefix="/todos", tags=["todos"])
 
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=TodoOutput)
+@router.post(
+    "", status_code=status.HTTP_201_CREATED, response_model=CommonResponse[TodoOutput]
+)
 def create_new_todo(
     data: TodoInput,
     session: Session = Depends(get_db),
@@ -19,7 +22,10 @@ def create_new_todo(
 ):
     data.user_id = current_user.id
     _service = TodoService(session)
-    return _service.create(data)
+    created_todo = _service.create(data)
+    return CommonResponse[TodoOutput](
+        message="Todo is created successfully.", data=created_todo
+    )
 
 
 @router.get("", status_code=status.HTTP_200_OK, response_model=TodoList)
@@ -41,22 +47,31 @@ def get_todo_details(_id: UUID4, session: Session = Depends(get_db)):
     return _service.get_by_id(_id)
 
 
-@router.delete("/{_id}", status_code=status.HTTP_200_OK)
+@router.delete(
+    "/{_id}", status_code=status.HTTP_200_OK, response_model=CommonResponse[TodoOutput]
+)
 def delete_todo(
     _id: UUID4,
     session: Session = Depends(get_db),
-    current_user: UserInDBBase = Depends(get_current_user),
+    _: UserInDBBase = Depends(get_current_user),
 ):
     deleted_todo = TodoService(session).delete(_id)
-    return {"message": "Item deleted successfully", "deleted_todo": deleted_todo}
+    return CommonResponse[TodoOutput](
+        message="Todo is deleted successfully.", data=deleted_todo
+    )
 
 
-@router.put("/{_id}", status_code=status.HTTP_200_OK, response_model=TodoOutput)
+@router.put(
+    "/{_id}", status_code=status.HTTP_200_OK, response_model=CommonResponse[TodoOutput]
+)
 def update_todo(
     _id: UUID4,
     data: TodoInput,
     session: Session = Depends(get_db),
-    current_user: UserInDBBase = Depends(get_current_user),
+    _: UserInDBBase = Depends(get_current_user),
 ):
     _service = TodoService(session)
-    return _service.update(_id, data)
+    updated_todo = _service.update(_id, data)
+    return CommonResponse[TodoOutput](
+        message="Todo is updated successfully.", data=updated_todo
+    )

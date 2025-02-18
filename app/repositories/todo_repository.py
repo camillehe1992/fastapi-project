@@ -37,10 +37,10 @@ class TodoRepository:
         db_item = self.session.query(Todo).filter_by(id=_id).first()
         return db_item is not None
 
-    def update(self, db_item: Todo, data: TodoInput) -> TodoInput:
-        db_item.title = data.title
-        db_item.description = data.description
-        db_item.completed = data.completed
+    def update(self, db_item: TodoOutput, updated: TodoInput) -> TodoOutput:
+        db_item.title = updated.title
+        db_item.completed = updated.completed
         self.session.commit()
         self.session.refresh(db_item)
-        return TodoInput(**db_item.__dict__)
+        updated_item = self.session.query(Todo).filter_by(id=db_item.id).first()
+        return TodoOutput(**updated_item.__dict__)

@@ -1,11 +1,11 @@
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 from pydantic import UUID4
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from schemas.todo import TodoInput, TodoOutput, TodoList
 from services.user_service import UserService
-from schemas.todo import TodoInput, TodoOutput
 from repositories.todo_repository import TodoRepository
 
 
@@ -22,7 +22,7 @@ class TodoService:
 
         return self.repository.create(data)
 
-    def get_all(self, page: int = 1, page_size: int = 15) -> Dict[str, Any]:
+    def get_all(self, page: int = 1, page_size: int = 15) -> Tuple[int, TodoList]:
         return self.repository.get_all(page=page, page_size=page_size)
 
     def get_by_id(self, _id: UUID4) -> Dict[str, Any]:
@@ -38,12 +38,12 @@ class TodoService:
         self.repository.delete(todo)
         return todo
 
-    def update(self, _id: UUID4, data: Dict) -> Dict[str, Any]:
+    def update(self, _id: UUID4, data: TodoInput) -> TodoOutput:
         if not self.repository.exists_by_id(_id):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Todo with ID {_id} not found",
             )
 
-        todo = self.repository.get_by_id(_id)
-        return self.repository.update(todo, data)
+        current_todo = self.repository.get_by_id(_id)
+        return self.repository.update(current_todo, data)
