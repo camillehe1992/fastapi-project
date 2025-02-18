@@ -29,8 +29,10 @@ def get_all_todos(
     page_size: int = Query(15, gt=0),
 ):
     _service = TodoService(session)
-    todos = _service.get_all(page=page, page_size=page_size)
-    return TodoList(todos=todos, page=page, page_size=len(todos))
+    total_count, todos = _service.get_all(page=page, page_size=page_size)
+    return TodoList(
+        todos=todos, page=page, page_size=len(todos), total_count=total_count
+    )
 
 
 @router.get("/{_id}", response_model=TodoOutput)

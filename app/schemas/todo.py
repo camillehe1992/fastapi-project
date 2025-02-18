@@ -31,4 +31,5 @@ class TodoOutput(BaseModel):
 class TodoList(BaseModel):
     page: int
     page_size: int
-    todos: List[Any]
+    total_count: int
+    todos: List[TodoOutput]

@@ -15,10 +15,10 @@ class TodoService:
         self.user_service = UserService(session)
 
     def create(self, data: TodoInput) -> TodoOutput:
-        if not self.user_service.is_superuser(data.user_id):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden"
-            )
+        # if not self.user_service.is_superuser(data.user_id):
+        #     raise HTTPException(
+        #         status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden"
+        #     )
 
         return self.repository.create(data)
 

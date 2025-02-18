@@ -11,18 +11,18 @@ from schemas.user import TokenData
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
-def get_user(db: Session, username: str):
+def get_user(db: Session, email: str):
     """
     Retrieve a user from the database by their username.
 
     Args:
         db (Session): The database session.
-        username (str): The username of the user to retrieve.
+        email (str): The email of the user to retrieve.
 
     Returns:
         User: The user object if found, otherwise None.
     """
-    return db.query(User).filter(User.username == username).first()
+    return db.query(User).filter(User.email == email).first()
 
 
 async def get_current_user(
@@ -41,13 +41,6 @@ async def get_current_user(
     Returns:
         User: The current user.
     """
-    # if token == "fake-token":
-    #     return {
-    #         "username": "John Doe",
-    #         "email": "john.doe@example.com",
-    #         "password": "Mypassword@123",
-    #     }
-
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -57,13 +50,13 @@ async def get_current_user(
         payload = jwt.decode(
             token, security.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
-        username: str = payload.get("sub")
-        if username is None:
+        email: str = payload.get("sub")
+        if email is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
+        token_data = TokenData(email=email)
     except JWTError:
         raise credentials_exception
-    user = get_user(db, username=token_data.username)
+    user = get_user(db, email=token_data.email)
     if user is None:
         raise credentials_exception
     return user

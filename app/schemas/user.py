@@ -13,14 +13,14 @@ class UserBase(BaseModel):
 
 
 class UserRegister(BaseModel):
-    email: str
-    username: str
-    password: str
+    email: str = Field(examples=["john.doe@example.com"])
+    username: str = Field(examples=["John Doe"])
+    password: str = Field(examples=["Password@123"])
 
 
 class UserLogin(BaseModel):
-    username: str
-    password: str
+    email: str = Field(examples=["john.doe@example.com"])
+    password: str = Field(examples=["Password@123"])
 
 
 class UserIn(UserBase):
@@ -39,7 +39,7 @@ class UserInDB(UserInDBBase):
 
 
 class TokenData(BaseModel):
-    username: Optional[str] = None
+    email: Optional[str] = None
 
 
 class Token(BaseModel):

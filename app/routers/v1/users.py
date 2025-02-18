@@ -17,7 +17,7 @@ def register(data: UserRegister, session: Session = Depends(get_db)):
     Register a new user.
 
     Args:
-        data (UserIn): Details of the user to be registered.
+        data (UserRegister): Details of the user to be registered.
         session (Session): Database session.
 
     Returns:
@@ -33,7 +33,7 @@ def login(data: UserLogin, session: Session = Depends(get_db)):
     Login user.
 
     Args:
-        data (UserLogin): Login data with username and password.
+        data (UserLogin): Login data with email and password.
         session (Session): Database session.
 
     Returns:
@@ -43,9 +43,7 @@ def login(data: UserLogin, session: Session = Depends(get_db)):
     return _service.login(data)
 
 
-@router.get(
-    "/me", status_code=status.HTTP_200_OK, response_model=UserBase, deprecated=True
-)
+@router.get("/me", status_code=status.HTTP_200_OK, response_model=UserBase)
 def get_me(user: UserIn = Depends(get_current_user)):
     """
     Retrieve information of the authenticated user.

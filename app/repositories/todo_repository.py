@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Tuple
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
@@ -18,11 +18,12 @@ class TodoRepository:
         self.session.refresh(db_item)
         return TodoOutput(**db_item.__dict__)
 
-    def get_all(self, page: int = 1, page_size: int = 15) -> TodoList:
+    def get_all(self, page: int = 1, page_size: int = 15) -> Tuple[int, TodoList]:
         offset = (page - 1) * page_size
         limit = page_size
+        total_count = self.session.query(Todo).count()
         db_items = self.session.query(Todo).offset(offset).limit(limit).all()
-        return [TodoOutput(**db_item.__dict__) for db_item in db_items]
+        return total_count, [TodoOutput(**db_item.__dict__) for db_item in db_items]
 
     def get_by_id(self, _id: UUID4) -> TodoOutput:
         return self.session.query(Todo).filter_by(id=_id).first()
