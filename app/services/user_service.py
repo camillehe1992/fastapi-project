@@ -4,7 +4,7 @@ from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from core.security import get_password_hash, pwd_context, create_access_token
-from config.settings import settings
+from settings import settings
 from repositories.user_repository import UserRepository
 from schemas.user import UserRegister, UserLogin, UserInDBBase
 from core.password_validator import validate_password

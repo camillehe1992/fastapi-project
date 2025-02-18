@@ -1,7 +1,6 @@
-# logging_config.py
 import logging
 
-from config.settings import settings
+from settings import settings
 
 
 # Central logging configuration

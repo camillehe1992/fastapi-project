@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.services.user_service import UserService
 from app.schemas.user import UserRegister, UserLogin, UserInDB
 from app.core.security import pwd_context
-from app.config.settings import settings
+from app.settings import settings
 
 
 # Mock data
@@ -114,8 +114,8 @@ def test_create_user_existing_username(
 
 
 # Test login method
-@patch("app.core.security.create_access_token")
-@patch("app.core.security.pwd_context.verify")
+@patch("app.services.user_service.create_access_token")
+@patch("app.services.user_service.pwd_context.verify")
 @patch("app.services.user_service.UserRepository.get_user_by_username")
 def test_login_user(
     mock_get_user_by_username, mock_pwd_verify, mock_create_access_token, user_service

@@ -1,6 +1,6 @@
 from fastapi.openapi.utils import get_openapi
 
-from config.settings import settings
+from settings import settings
 
 
 # Custom OpenAPI schema to include securitySchemes

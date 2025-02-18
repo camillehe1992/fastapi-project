@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from config.settings import settings
-from config.openapi import custom_openapi
+from app.settings import settings
+from utils.openapi import custom_openapi
 from middlewares import log_requests_middleware, add_cors_middleware
 from routers.api import router
 from exception_handlers import global_exception_handler

@@ -1,6 +1,5 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo  # Python 3.9+
-from typing import Optional
 
 
 class DateTimeHelper:

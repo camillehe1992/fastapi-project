@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-from config.settings import settings
+from settings import settings
 
 if settings.DEBUG:
     SQLALCHEMY_DATABASE_URL = settings.SQLITE_CONNECTION_STRING

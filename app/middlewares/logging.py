@@ -1,7 +1,7 @@
 # logging_middleware.py
 from fastapi import Request
 
-from config.logging import logger
+from logger import logger
 
 
 # Middleware to log requests and responses

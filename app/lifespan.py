@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from config.logging import logger
+from logger import logger
 from db.utils import create_tables
 
 

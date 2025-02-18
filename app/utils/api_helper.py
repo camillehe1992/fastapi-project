@@ -3,7 +3,7 @@
 import requests
 
 
-class ApiClient:
+class ApiHelper:
     def __init__(self, base_url="https://jsonplaceholder.typicode.com"):
         """
         Initialize the API client with a base URL.

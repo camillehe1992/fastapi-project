@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from config.settings import settings
+from settings import settings
 from utils.datetime_helper import DateTimeHelper
 
 router = APIRouter(prefix="/system", tags=["system"])
