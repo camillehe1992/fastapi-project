@@ -1,13 +1,17 @@
-import unittest
+from unittest import TestCase
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from app.utils.datetime_helper import DateTimeHelper
 
 
-class TestDateTimeHelper(unittest.TestCase):
+class TestDateTimeHelper(TestCase):
     def setUp(self):
         """Initialize the DateTimeHelper with a default time zone for all tests."""
         self.helper = DateTimeHelper(timezone="UTC")
+
+    def test_initialize_with_timezone(self):
+        """Test Initialize the DateTimeHelpe with specific time zone.r"""
+        self.helper = DateTimeHelper(timezone="Asia/Shanghai")
 
     def test_now(self):
         """Test the `now` method to ensure it returns the current time in the default time zone."""

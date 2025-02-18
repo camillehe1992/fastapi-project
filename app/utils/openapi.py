@@ -26,9 +26,13 @@ def custom_openapi(app):
         }
     }
 
+    openapi_schema["components"] = components
+
     # Apply the security scheme globally
     # openapi_schema["security"] = [{"OAuth2PasswordBearer": []}]
 
     # Save the custom schema
     app.openapi_schema = openapi_schema
+
+    print(openapi_schema)
     return app.openapi_schema

@@ -38,8 +38,8 @@ class TestPydanticModels(unittest.TestCase):
 
     def test_user_login(self):
         """Test the UserLogin model."""
-        user = UserLogin(username="John Doe", password="password123")
-        self.assertEqual(user.username, "John Doe")
+        user = UserLogin(email="john.doe@example.com", password="password123")
+        self.assertEqual(user.email, "john.doe@example.com")
         self.assertEqual(user.password, "password123")
 
     def test_user_in(self):
@@ -93,11 +93,11 @@ class TestPydanticModels(unittest.TestCase):
 
     def test_token_data(self):
         """Test the TokenData model."""
-        token_data = TokenData(username="John Doe")
-        self.assertEqual(token_data.username, "John Doe")
+        token_data = TokenData(email="john.doe@example.com")
+        self.assertEqual(token_data.email, "john.doe@example.com")
 
-        token_data_none = TokenData(username=None)
-        self.assertIsNone(token_data_none.username)
+        token_data_none = TokenData(email=None)
+        self.assertIsNone(token_data_none.email)
 
     def test_token(self):
         """Test the Token model."""

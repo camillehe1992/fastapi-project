@@ -15,7 +15,7 @@ from app.settings import settings
 MOCK_USER_ID = uuid4()
 MOCK_USERNAME = "testuser"
 MOCK_EMAIL = "testuser@example.com"
-MOCK_PASSWORD = "securepassword123"
+MOCK_PASSWORD = "Securepassword@123"
 MOCK_HASHED_PASSWORD = pwd_context.hash(MOCK_PASSWORD)
 
 # Mock UserInDB object
@@ -36,7 +36,7 @@ MOCK_USER_REGISTER = UserRegister(
 
 # Mock UserLogin object
 MOCK_USER_LOGIN = UserLogin(
-    username=MOCK_USERNAME,
+    email=MOCK_EMAIL,
     password=MOCK_PASSWORD,
 )
 
@@ -116,12 +116,12 @@ def test_create_user_existing_username(
 # Test login method
 @patch("app.services.user_service.create_access_token")
 @patch("app.services.user_service.pwd_context.verify")
-@patch("app.services.user_service.UserRepository.get_user_by_username")
+@patch("app.services.user_service.UserRepository.get_user_by_email")
 def test_login_user(
-    mock_get_user_by_username, mock_pwd_verify, mock_create_access_token, user_service
+    mock_get_user_by_email, mock_pwd_verify, mock_create_access_token, user_service
 ):
     # Mock repository method to return a user
-    mock_get_user_by_username.return_value = MOCK_USER
+    mock_get_user_by_email.return_value = MOCK_USER
 
     # Mock password verification
     mock_pwd_verify.return_value = True
@@ -134,19 +134,19 @@ def test_login_user(
 
     # Assertions
     assert result == {"access_token": "mock_token", "token_type": "bearer"}
-    mock_get_user_by_username.assert_called_once_with(MOCK_USERNAME)
+    mock_get_user_by_email.assert_called_once_with(MOCK_EMAIL)
     mock_pwd_verify.assert_called_once_with(MOCK_PASSWORD, MOCK_HASHED_PASSWORD)
     mock_create_access_token.assert_called_once_with(
-        data={"sub": MOCK_USERNAME},
+        data={"sub": MOCK_EMAIL},
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
     )
 
 
 # Test login method with incorrect username or password
-@patch("app.services.user_service.UserRepository.get_user_by_username")
-def test_login_user_incorrect_credentials(mock_get_user_by_username, user_service):
+@patch("app.services.user_service.UserRepository.get_user_by_email")
+def test_login_user_incorrect_credentials(mock_get_user_by_email, user_service):
     # Mock repository method to return None (user not found)
-    mock_get_user_by_username.return_value = None
+    mock_get_user_by_email.return_value = None
 
     # Call the method and expect an exception
     with pytest.raises(HTTPException) as exc_info:
@@ -154,7 +154,7 @@ def test_login_user_incorrect_credentials(mock_get_user_by_username, user_servic
 
     # Assertions
     assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
-    assert exc_info.value.detail == "Incorrect username or password"
+    assert exc_info.value.detail == "Incorrect email or password"
 
 
 # Test is_superuser method

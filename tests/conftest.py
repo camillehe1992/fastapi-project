@@ -27,28 +27,28 @@ def override_get_db():
         db.close()
 
 
-def mock_get_current_user():
-    return {
-        "username": "John Doe",
-        "email": "john.doe@example.com",
-        "password": "Mypassword@123",
-    }
+# def mock_get_current_user():
+#     return {
+#         "username": "John Doe",
+#         "email": "john.doe@example.com",
+#         "password": "Mypassword@123",
+#     }
 
 
 app.dependency_overrides[get_db] = override_get_db
-app.dependency_overrides[get_current_user] = mock_get_current_user
+# app.dependency_overrides[get_current_user] = mock_get_current_user
 
 
 # Fixture to create the test database
-@pytest.fixture(scope="module")
-def test_db():
-    Base.metadata.create_all(bind=engine)
-    yield
-    Base.metadata.drop_all(bind=engine)
+# @pytest.fixture(scope="module")
+# def test_db():
+#     Base.metadata.create_all(bind=engine)
+#     yield
+#     Base.metadata.drop_all(bind=engine)
 
 
-# Fixture to provide a test client
-@pytest.fixture(scope="module")
-def client():
-    with TestClient(app) as client:
-        yield client
+# # Fixture to provide a test client
+# @pytest.fixture(scope="module")
+# def client():
+#     with TestClient(app) as client:
+#         yield client
