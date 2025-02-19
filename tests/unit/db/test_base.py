@@ -1,66 +1,86 @@
-# import pytest
-# from sqlalchemy import create_engine
-# from sqlalchemy.orm import sessionmaker, Session
+from unittest import TestCase
+from unittest.mock import patch, MagicMock
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
-# # from app.settings import settings
-# from app.db.base import get_db, Base, settings
-
-
-# @pytest.fixture
-# def mock_debug_true(monkeypatch):
-#     """Fixture to mock DEBUG=True."""
-#     monkeypatch.setattr(settings, "DEBUG", True)
-#     monkeypatch.setattr(settings, "SQLITE_CONNECTION_STRING", "sqlite:///:memory:")
+# Import the module to be tested
+from app.db.base import engine, get_db, SessionLocal
 
 
-# @pytest.fixture
-# def mock_debug_false(monkeypatch):
-#     """Fixture to mock DEBUG=False."""
-#     monkeypatch.setattr(settings, "DEBUG", False)
-#     monkeypatch.setattr(
-#         settings,
-#         "POSTGRES_CONNECTION_STRING",
-#         "postgresql://user:password@localhost/test_db",
-#     )
+class TestDatabaseConfig(TestCase):
 
+    # @patch("app.settings.settings")
+    # @patch("app.db.base.create_engine")
+    # def test_database_url_configuration(self, mock_create_engine, mock_settings):
+    #     """
+    #     Test that the correct database URL is used based on the DEBUG setting.
+    #     """
+    #     # Test case 1: DEBUG is True (SQLite)
+    #     mock_settings.DEBUG = True
+    #     mock_settings.SQLITE_CONNECTION_STRING = "sqlite:///test.db"
+    #     mock_settings.POSTGRES_CONNECTION_STRING = (
+    #         "postgresql://user:password@localhost/dbname"
+    #     )
 
-# @pytest.fixture
-# def db_session(mock_debug_true):
-#     """Fixture to create a database session for testing."""
-#     engine = create_engine(settings.SQLITE_CONNECTION_STRING)
-#     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-#     Base.metadata.create_all(bind=engine)
-#     db = SessionLocal()
-#     yield db
-#     db.close()
-#     Base.metadata.drop_all(bind=engine)
+    #     # Re-import the module to reinitialize the engine with the mocked settings
+    #     with patch.dict("sys.modules", {"app.db.base": MagicMock()}):
+    #         import app.db.base
 
+    #         app.db.base.engine = create_engine(mock_settings.SQLITE_CONNECTION_STRING)
 
-# def test_get_db_with_debug_true(mock_debug_true):
-#     """Test that get_db uses SQLite when DEBUG=True."""
-#     db_gen = get_db()
-#     db = next(db_gen)
-#     assert isinstance(db, Session)
-#     assert db.bind.url.database == ":memory:"
-#     try:
-#         next(db_gen)
-#     except StopIteration:
-#         pass
+    #     # Verify the engine was created with the SQLite connection string
+    #     # mock_create_engine.assert_called_once_with(
+    #     #     mock_settings.SQLITE_CONNECTION_STRING
+    #     # )
 
+    #     # Test case 2: DEBUG is False (PostgreSQL)
+    #     mock_create_engine.reset_mock()  # Reset the mock for the next test case
+    #     mock_settings.DEBUG = False
 
-# def test_get_db_with_debug_false(mock_debug_false):
-#     """Test that get_db uses PostgreSQL when DEBUG=False."""
-#     db_gen = get_db()
-#     db = next(db_gen)
-#     assert isinstance(db, Session)
-#     assert db.bind.url.database == "test_db"
-#     try:
-#         next(db_gen)
-#     except StopIteration:
-#         pass
+    #     # Re-import the module to reinitialize the engine with the mocked settings
+    #     with patch.dict("sys.modules", {"app.db.base": MagicMock()}):
+    #         import app.db.base
 
+    #         app.db.base.engine = create_engine(mock_settings.POSTGRES_CONNECTION_STRING)
 
-# def test_db_session_fixture(db_session):
-#     """Test the db_session fixture and ensure it works correctly."""
-#     assert isinstance(db_session, Session)
-#     assert db_session.bind.url.database == ":memory:"
+    #     # Verify the engine was created with the PostgreSQL connection string
+    #     mock_create_engine.assert_called_once_with(
+    #         mock_settings.POSTGRES_CONNECTION_STRING
+    #     )
+
+    # @patch("app.db.base.settings")
+    # @patch("app.db.base.sessionmaker")
+    # def test_sessionmaker_configuration(self, mock_sessionmaker, mock_settings):
+    #     """
+    #     Test that sessionmaker is configured correctly.
+    #     """
+    #     mock_settings.DEBUG = False
+    #     # Verify sessionmaker is called with the correct parameters
+    #     mock_sessionmaker.assert_called_once_with(
+    #         autocommit=False,
+    #         autoflush=False,
+    #         bind=engine,
+    #     )
+
+    @patch("app.db.base.SessionLocal")
+    def test_get_db(self, mock_session_local):
+        """
+        Test the get_db function.
+        """
+        # Mock the session
+        mock_session = MagicMock(spec=Session)
+        mock_session_local.return_value = mock_session
+
+        # Call get_db and verify the session is yielded and closed
+        db_gen = get_db()
+        db = next(db_gen)
+
+        # Verify the session is yielded
+        self.assertEqual(db, mock_session)
+
+        # Simulate the end of the context manager
+        with self.assertRaises(StopIteration):
+            next(db_gen)
+
+        # Verify the session is closed
+        mock_session.close.assert_called_once()
