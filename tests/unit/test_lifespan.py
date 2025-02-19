@@ -2,13 +2,12 @@ import pytest
 import unittest
 from unittest.mock import patch
 from fastapi import FastAPI
-from fastapi.testclient import TestClient
 
-from app.logger import logger
+# from app.logger import logger
 from app.lifespan import lifespan
 
 
-@patch.object(logger, "info")
+@patch("db.utils.logger.info")
 @patch("db.utils.create_tables")
 class TestLifespan(unittest.TestCase):
 
