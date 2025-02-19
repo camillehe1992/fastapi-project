@@ -35,12 +35,14 @@ class Settings(BaseSettings):
     # Origins
     ORIGINS: Optional[str] = os.getenv("ORIGINS", "")
     # PostgreSQL connection string
+    POSTGRES_HOST: Optional[str] = os.getenv("POSTGRES_HOST", "127.0.0.1")
     POSTGRES_DB: Optional[str] = os.getenv("POSTGRES_DB")
     POSTGRES_USER: Optional[str] = os.getenv("POSTGRES_USER")
     POSTGRES_PASSWORD: Optional[str] = os.getenv("POSTGRES_PASSWORD")
     POSTGRES_CONNECTION_STRING: str = (
-        f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@127.0.0.1/{POSTGRES_DB}"
+        f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}"
     )
+    print(TITLE)
 
 
 settings = Settings()
