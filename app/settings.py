@@ -4,7 +4,8 @@ from typing import Optional
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 
-load_dotenv()
+if os.getenv("ENVIRONMENT", "local") == "local":
+    load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -15,6 +16,8 @@ class Settings(BaseSettings):
     # FastAPI
     # Debug should be set to False on production
     DEBUG: Optional[bool] = os.getenv("DEBUG", "True") == "True"
+    # Environment
+    ENVIRONMENT: Optional[str] = os.getenv("ENVIRONMENT", "local")
     # Title is the name of application
     TITLE: Optional[str] = os.getenv("TITLE", "RestAPI")
     # Project version

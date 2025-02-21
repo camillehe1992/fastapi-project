@@ -1,10 +1,8 @@
 import uuid
-
 from sqlalchemy import (
     Column,
     String,
     Boolean,
-    Text,
     ForeignKey,
     DateTime,
     func,
@@ -15,7 +13,17 @@ from sqlalchemy.orm import relationship, declarative_base
 Base = declarative_base()
 
 
-class User(Base):
+class BaseModel(Base):
+    __abstract__ = (
+        True  # This makes BaseModel an abstract class, so it won't create a table
+    )
+
+    def as_dict(self):
+        """Convert the model's attributes into a dictionary."""
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+class User(BaseModel):
     __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -27,11 +35,8 @@ class User(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
-    posts = relationship("Post", back_populates="user")
-    albums = relationship("Album", back_populates="user")
 
-
-class Todo(Base):
+class Todo(BaseModel):
     __tablename__ = "todos"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -40,40 +45,3 @@ class Todo(Base):
     completed = Column(Boolean, default=False)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-
-
-class Post(Base):
-    __tablename__ = "posts"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    title = Column(String, index=True, nullable=False)
-    body = Column(Text, nullable=False)
-    user_id = Column(UUID, ForeignKey("users.id"), nullable=False)
-
-    user = relationship("User", back_populates="posts")
-
-
-class Album(Base):
-    __tablename__ = "albums"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    title = Column(String, index=True, nullable=False)
-    user_id = Column(UUID, ForeignKey("users.id"), nullable=False)
-
-    user = relationship("User", back_populates="albums")
-    photos = relationship(
-        "Photo", back_populates="album"
-    )  # Assuming there's a Photo model
-
-
-# Assuming there's a Photo model related to Album
-class Photo(Base):
-    __tablename__ = "photos"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    title = Column(String, index=True, nullable=False)
-    url = Column(String, nullable=False)
-    thumbnailUrl = Column(String, nullable=False)
-    album_id = Column(UUID, ForeignKey("albums.id"), nullable=False)
-
-    album = relationship("Album", back_populates="photos")

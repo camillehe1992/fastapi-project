@@ -4,7 +4,7 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from core import security
-from db.base import get_db
+from db.base import get_session
 from db.models import User
 from schemas.user import TokenData
 
@@ -26,7 +26,7 @@ def get_user(db: Session, email: str):
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_session)
 ):
     """
     Get the current user based on the provided token.

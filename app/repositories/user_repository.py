@@ -4,7 +4,7 @@ from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from db.models import User
-from schemas.user import UserIn, UserInDBBase, UserInDB
+from schemas.user import UserIn, UserInDBBase, UserInDB, UserRegister
 
 
 class UserRepository:
@@ -21,7 +21,7 @@ class UserRepository:
         """
         self.session = session
 
-    def create(self, data: UserIn, hashed_password: str) -> UserInDBBase:
+    def create(self, data: UserRegister, hashed_password: str) -> UserInDBBase:
         """
         Create a new user.
 
@@ -38,9 +38,6 @@ class UserRepository:
         self.session.add(db_user)
         self.session.commit()
         self.session.refresh(db_user)
-        # user_data = {
-        #     k: v for k, v in db_user.__dict__.items() if k != "_sa_instance_state"
-        # }
         return UserInDBBase(**db_user.__dict__)
 
     def user_exists_by_email(self, email: str) -> bool:

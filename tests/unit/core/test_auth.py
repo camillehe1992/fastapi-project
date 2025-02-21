@@ -19,8 +19,10 @@ class TestGetUser(unittest.TestCase):
         self.mock_oauth2_scheme = patch(
             "app.core.auth.oauth2_scheme", new_callable=AsyncMock
         ).start()
-        self.mock_get_db = patch("app.core.auth.get_db", new_callable=AsyncMock).start()
-        self.mock_get_db.return_value = self.mock_db_session
+        self.mock_get_session = patch(
+            "app.core.auth.get_session", new_callable=AsyncMock
+        ).start()
+        self.mock_get_session.return_value = self.mock_db_session
 
     def tearDown(self):
         patch.stopall()
@@ -87,7 +89,7 @@ class TestGetUser(unittest.TestCase):
 
 
 @patch("app.core.auth.oauth2_scheme")  # Mock the OAuth2PasswordBearer dependency
-@patch("app.core.auth.get_db")  # Mock the database session
+@patch("app.core.auth.get_session")  # Mock the database session
 @patch("app.core.auth.jwt.decode")  # Mock jwt.decode
 @patch("app.core.auth.get_user")  # Mock the get_user function
 class TestGetCurrentUser(unittest.IsolatedAsyncioTestCase):
@@ -97,10 +99,10 @@ class TestGetCurrentUser(unittest.IsolatedAsyncioTestCase):
         self.mock_token = "test_token"
         self.mock_email = "test@example.com"
         self.mock_user = MagicMock(spec=User)
-        self.mock_get_db = MagicMock(spec=Session)
+        self.mock_get_session = MagicMock(spec=Session)
 
     async def test_get_current_user_valid_token(
-        self, mock_get_user, mock_jwt_decode, mock_get_db, mock_oauth2_scheme
+        self, mock_get_user, mock_jwt_decode, mock_get_session, mock_oauth2_scheme
     ):
         """
         Test that get_current_user returns the correct user when the token is valid.
@@ -109,22 +111,22 @@ class TestGetCurrentUser(unittest.IsolatedAsyncioTestCase):
         mock_oauth2_scheme.return_value = self.mock_token
         mock_jwt_decode.return_value = {"sub": self.mock_email}
         mock_get_user.return_value = self.mock_user
-        mock_get_db.return_value = self.mock_get_db
+        mock_get_session.return_value = self.mock_get_session
 
         # Act
-        result = await get_current_user(token=self.mock_token, db=self.mock_get_db)
+        result = await get_current_user(token=self.mock_token, db=self.mock_get_session)
 
         # Assert
         mock_jwt_decode.assert_called_once_with(
             self.mock_token, security.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         mock_get_user.assert_called_once_with(
-            mock_get_db.return_value, email=self.mock_email
+            mock_get_session.return_value, email=self.mock_email
         )
         self.assertEqual(result, self.mock_user)
 
     async def test_get_current_user_invalid_token(
-        self, mock_get_user, mock_jwt_decode, mock_get_db, mock_oauth2_scheme
+        self, mock_get_user, mock_jwt_decode, mock_get_session, mock_oauth2_scheme
     ):
         """
         Test that get_current_user raises an HTTPException when the token is invalid.
@@ -142,7 +144,7 @@ class TestGetCurrentUser(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(context.exception.headers, {"WWW-Authenticate": "Bearer"})
 
     async def test_get_current_user_missing_email(
-        self, mock_get_user, mock_jwt_decode, mock_get_db, mock_oauth2_scheme
+        self, mock_get_user, mock_jwt_decode, mock_get_session, mock_oauth2_scheme
     ):
         """
         Test that get_current_user raises an HTTPException when the token payload is missing the email.
@@ -160,7 +162,7 @@ class TestGetCurrentUser(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(context.exception.headers, {"WWW-Authenticate": "Bearer"})
 
     async def test_get_current_user_user_not_found(
-        self, mock_get_user, mock_jwt_decode, mock_get_db, mock_oauth2_scheme
+        self, mock_get_user, mock_jwt_decode, mock_get_session, mock_oauth2_scheme
     ):
         """
         Test that get_current_user raises an HTTPException when the user is not found in the database.

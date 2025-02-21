@@ -1,5 +1,5 @@
-from db.base import Base, engine
-from db.models import User, Todo, Album, Photo, Post
+from db.base import engine
+from db.models import Base, User, Todo
 
 
 def create_tables():
@@ -9,9 +9,6 @@ def create_tables():
     Base.metadata.create_all(bind=engine)
     User.metadata.create_all(bind=engine)
     Todo.metadata.create_all(bind=engine)
-    # Album.metadata.create_all(bind=engine)
-    # Photo.metadata.create_all(bind=engine)
-    # Post.metadata.create_all(bind=engine)
 
 
 def drop_tables():
@@ -21,6 +18,3 @@ def drop_tables():
     Base.metadata.drop_all(bind=engine)
     User.metadata.drop_all(bind=engine)
     Todo.metadata.drop_all(bind=engine)
-    # Album.metadata.drop_all(bind=engine)
-    # Photo.metadata.drop_all(bind=engine)
-    # Post.metadata.drop_all(bind=engine)

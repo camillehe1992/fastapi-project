@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 from sqlalchemy.orm import Session
 
 # Import the module to be tested
-from app.db.base import get_db
+from app.db.base import get_session
 
 
 class TestDatabaseConfig(unittest.TestCase):
@@ -46,16 +46,16 @@ class TestDatabaseConfig(unittest.TestCase):
         )
 
     @patch("app.db.base.SessionLocal")
-    def test_get_db(self, mock_session_local):
+    def test_get_session(self, mock_session_local):
         """
-        Test the get_db function.
+        Test the get_session function.
         """
         # Mock the session
         mock_session = MagicMock(spec=Session)
         mock_session_local.return_value = mock_session
 
-        # Call get_db and verify the session is yielded and closed
-        db_gen = get_db()
+        # Call get_session and verify the session is yielded and closed
+        db_gen = get_session()
         db = next(db_gen)
 
         # Verify the session is yielded

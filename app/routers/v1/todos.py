@@ -6,7 +6,7 @@ from schemas.response import CommonResponse
 from schemas.todo import TodoInput, TodoOutput, TodoList
 from schemas.user import UserInDBBase
 from services.todo_service import TodoService
-from db.base import get_db
+from db.base import get_session
 from core.auth import get_current_user
 
 router = APIRouter(prefix="/todos", tags=["todos"])
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/todos", tags=["todos"])
 )
 def create_new_todo(
     data: TodoInput,
-    session: Session = Depends(get_db),
+    session: Session = Depends(get_session),
     current_user: UserInDBBase = Depends(get_current_user),
 ):
     data.user_id = current_user.id
@@ -30,7 +30,7 @@ def create_new_todo(
 
 @router.get("", status_code=status.HTTP_200_OK, response_model=TodoList)
 def get_all_todos(
-    session: Session = Depends(get_db),
+    session: Session = Depends(get_session),
     page: int = Query(1, gt=0),
     page_size: int = Query(15, gt=0),
 ):
@@ -42,7 +42,7 @@ def get_all_todos(
 
 
 @router.get("/{_id}", response_model=TodoOutput)
-def get_todo_details(_id: UUID4, session: Session = Depends(get_db)):
+def get_todo_details(_id: UUID4, session: Session = Depends(get_session)):
     _service = TodoService(session)
     return _service.get_by_id(_id)
 
@@ -52,7 +52,7 @@ def get_todo_details(_id: UUID4, session: Session = Depends(get_db)):
 )
 def delete_todo(
     _id: UUID4,
-    session: Session = Depends(get_db),
+    session: Session = Depends(get_session),
     _: UserInDBBase = Depends(get_current_user),
 ):
     deleted_todo = TodoService(session).delete(_id)
@@ -67,7 +67,7 @@ def delete_todo(
 def update_todo(
     _id: UUID4,
     data: TodoInput,
-    session: Session = Depends(get_db),
+    session: Session = Depends(get_session),
     _: UserInDBBase = Depends(get_current_user),
 ):
     _service = TodoService(session)
