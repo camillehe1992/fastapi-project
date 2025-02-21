@@ -1,61 +1,57 @@
-import pytest
-from unittest.mock import MagicMock, patch
+import unittest
+from unittest.mock import patch, MagicMock, AsyncMock, call
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
-from app.middlewares import log_requests_middleware
+# Import the middleware to be tested
+from app.middlewares.logging import log_requests_middleware
 
 
-# @patch("app.middlewares.logger.info")
-# @pytest.mark.asyncio
-# async def test_log_requests_middleware_success(mock_logger_info):
-#     """
-#     Test that the middleware logs the incoming request and outgoing response correctly.
-#     """
-#     # Mock the Request object
-#     mock_request = MagicMock(spec=Request)
-#     mock_request.method = "GET"
-#     mock_request.url = "http://example.com"
+class TestLogRequestsMiddleware(unittest.IsolatedAsyncioTestCase):
 
-#     # Mock the call_next function to return a response
-#     mock_response = JSONResponse(content={"message": "Success"}, status_code=200)
-#     mock_call_next = MagicMock(return_value=mock_response)
+    @patch("app.middlewares.logging.logger")
+    async def test_log_requests_middleware_success(self, mock_logger):
+        # Arrange
+        mock_request = MagicMock(spec=Request)
+        mock_request.method = "GET"
+        mock_request.url = "http://test.com/endpoint"
 
-#     # Call the middleware
-#     response = await log_requests_middleware(mock_request, mock_call_next)
+        mock_response = JSONResponse(content={"message": "Success"}, status_code=200)
+        mock_call_next = AsyncMock(return_value=mock_response)
 
-#     # Assert that the logger was called with the correct messages
-#     mock_logger_info.assert_any_call("Incoming request: GET http://example.com")
-#     mock_logger_info.assert_any_call("Outgoing response: 200")
+        # Act
+        response = await log_requests_middleware(mock_request, mock_call_next)
 
-#     # Assert that the response is returned correctly
-#     assert response == mock_response
+        # Assert
+        # Verify that the logger was called with the correct messages
+        mock_logger.info.assert_has_calls(
+            [
+                call(f"Incoming request: {mock_request.method} {mock_request.url}"),
+                call(f"Outgoing response: {mock_response.status_code}"),
+            ]
+        )
+        mock_call_next.assert_called_once_with(mock_request)
+        self.assertEqual(response, mock_response)
 
+    @patch("app.middlewares.logging.logger")
+    async def test_log_requests_middleware_exception(self, mock_logger):
+        # Arrange
+        mock_request = MagicMock(spec=Request)
+        mock_request.method = "POST"
+        mock_request.url = "http://test.com/error-endpoint"
 
-@patch("app.middlewares.logger.error")
-@patch("app.middlewares.logger.info")
-@pytest.mark.asyncio
-async def test_log_requests_middleware_exception(mock_logger_info, mock_logger_error):
-    """
-    Test that the middleware logs an exception when the request fails.
-    """
-    # Mock the Request object
-    mock_request = MagicMock(spec=Request)
-    mock_request.method = "GET"
-    mock_request.url = "http://example.com"
+        mock_exception = Exception("Test exception")
+        mock_call_next = AsyncMock(side_effect=mock_exception)
 
-    # Mock the call_next function to raise an exception
-    mock_exception = Exception("Test exception")
-    mock_call_next = MagicMock(side_effect=mock_exception)
+        # Act & Assert
+        with self.assertRaises(Exception) as context:
+            await log_requests_middleware(mock_request, mock_call_next)
 
-    # Call the middleware and expect an exception
-    with pytest.raises(Exception, match="Test exception"):
-        await log_requests_middleware(mock_request, mock_call_next)
-
-    # Assert that the logger was called with the correct messages
-    mock_logger_info.assert_called_once_with(
-        f"Incoming request: GET http://example.com"
-    )
-    mock_logger_error.assert_called_once_with(
-        "Request failed: Test exception", exc_info=True
-    )
+        # Verify that the exception was logged
+        mock_logger.info.assert_called_once_with(
+            f"Incoming request: {mock_request.method} {mock_request.url}"
+        )
+        mock_logger.error.assert_called_once_with(
+            f"Request failed: {str(context.exception)}", exc_info=True
+        )
+        mock_call_next.assert_called_once_with(mock_request)

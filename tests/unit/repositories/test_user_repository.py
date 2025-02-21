@@ -14,25 +14,25 @@ class TestUserRepository(TestCase):
         self.mock_session = Mock(spec=Session)
         self.user_repo = UserRepository(self.mock_session)
 
-    # def test_create_user(self):
-    #     # Create a mock user input data
-    #     user_data = UserIn(
-    #         username="testuser", email="test@example.com", password="password123"
-    #     )
+    def test_create_user(self):
+        # Create a mock user input data
+        user_data = UserIn(
+            username="testuser", email="test@example.com", password="password123"
+        )
 
-    #     # Mock the hashed password
-    #     hashed_password = "hashed_password123"
+        # Mock the hashed password
+        hashed_password = "hashed_password123"
 
-    #     # Mock the database user object
-    #     mock_db_user = Mock()
-    #     mock_db_user.__dict__ = {
-    #         "id": UUID4("123e4567-e89b-12d3-a456-426614174000"),
-    #         "username": "testuser",
-    #         "email": "test@example.com",
-    #         # "hashed_password": hashed_password,
-    #         "is_superuser": False,
-    #         "is_active": True,
-    #     }
+        # Mock the database user object
+        mock_db_user = Mock()
+        mock_db_user.__dict__ = {
+            "id": UUID4("123e4567-e89b-12d3-a456-426614174000"),
+            "username": "testuser",
+            "email": "test@example.com",
+            # "hashed_password": hashed_password,
+            "is_superuser": False,
+            "is_active": True,
+        }
 
     #     # Mock the session methods
     #     self.mock_session.add.return_value = None
