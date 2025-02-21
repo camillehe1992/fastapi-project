@@ -33,6 +33,4 @@ def custom_openapi(app):
 
     # Save the custom schema
     app.openapi_schema = openapi_schema
-
-    print(openapi_schema)
     return app.openapi_schema

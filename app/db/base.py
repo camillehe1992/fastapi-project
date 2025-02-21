@@ -3,8 +3,6 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 from settings import settings
 
-
-print(settings.DEBUG)
 if settings.DEBUG:
     SQLALCHEMY_DATABASE_URL = settings.SQLITE_CONNECTION_STRING
 else:

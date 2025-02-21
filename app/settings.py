@@ -42,7 +42,6 @@ class Settings(BaseSettings):
     POSTGRES_CONNECTION_STRING: str = (
         f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}"
     )
-    print(TITLE)
 
 
 settings = Settings()

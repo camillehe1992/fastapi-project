@@ -41,7 +41,6 @@ class UserRepository:
         # user_data = {
         #     k: v for k, v in db_user.__dict__.items() if k != "_sa_instance_state"
         # }
-        print(db_user)
         return UserInDBBase(**db_user.__dict__)
 
     def user_exists_by_email(self, email: str) -> bool:
