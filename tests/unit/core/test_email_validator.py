@@ -1,9 +1,9 @@
-from unittest import TestCase
+import unittest
 from fastapi import HTTPException, status
 from app.core.email_validator import validate_email
 
 
-class TestValidateEmail(TestCase):
+class TestValidateEmail(unittest.TestCase):
 
     def test_valid_email(self):
         # Test valid email addresses

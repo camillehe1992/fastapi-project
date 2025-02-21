@@ -1,9 +1,7 @@
-import pytest
 import unittest
 from unittest.mock import patch
 from fastapi import FastAPI
 
-# from app.logger import logger
 from app.lifespan import lifespan
 
 

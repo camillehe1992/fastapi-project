@@ -1,5 +1,5 @@
 import importlib
-from unittest import TestCase
+import unittest
 from unittest.mock import patch, MagicMock
 from sqlalchemy.orm import Session
 
@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.db.base import get_db
 
 
-class TestDatabaseConfig(TestCase):
+class TestDatabaseConfig(unittest.TestCase):
 
     @patch("app.db.base.settings.DEBUG", True)  # Mock DEBUG to True
     @patch(

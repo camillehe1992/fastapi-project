@@ -1,15 +1,13 @@
 from pydantic import UUID4
-from unittest import TestCase
-from unittest.mock import Mock, patch
+import unittest
+from unittest.mock import Mock
 
 from sqlalchemy.orm import Session
-
-from app.db.models import User
-from app.schemas.user import UserIn, UserInDBBase
+from app.schemas.user import UserIn
 from app.repositories.user_repository import UserRepository
 
 
-class TestUserRepository(TestCase):
+class TestUserRepository(unittest.TestCase):
     def setUp(self):
         self.mock_session = Mock(spec=Session)
         self.user_repo = UserRepository(self.mock_session)

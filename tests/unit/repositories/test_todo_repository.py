@@ -1,21 +1,16 @@
-from unittest import TestCase
+import unittest
 from unittest.mock import patch, MagicMock
-from uuid import UUID, uuid4
-from typing import Tuple
-
-from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from app.db.models import Todo
 from app.repositories.todo_repository import (
     TodoRepository,
     TodoInput,
-    TodoList,
     TodoOutput,
 )
 
 
-class TestTodoRepository(TestCase):
+class TestTodoRepository(unittest.TestCase):
 
     def setUp(self):
         self.mock_session = MagicMock(spec=Session)

@@ -1,9 +1,7 @@
 import unittest
 import logging
 from app.settings import settings
-from app.logger import (
-    setup_logging,
-)
+from app.logger import setup_logging
 
 
 class TestSetupLogging(unittest.TestCase):

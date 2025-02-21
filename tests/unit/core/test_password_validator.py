@@ -1,9 +1,9 @@
-from unittest import TestCase
+import unittest
 from fastapi import HTTPException, status
 from app.core.password_validator import validate_password
 
 
-class TestValidatePassword(TestCase):
+class TestValidatePassword(unittest.TestCase):
 
     def test_valid_password(self):
         # Test a valid password

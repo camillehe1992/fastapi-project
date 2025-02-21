@@ -1,4 +1,3 @@
-import pytest
 import unittest
 from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi import HTTPException, status
@@ -6,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.elements import BinaryExpression
 from jose import JWTError
 from app.core import security
-from app.core.auth import get_user, get_current_user, User, TokenData
+from app.core.auth import get_user, get_current_user, User
 
 
 class TestGetUser(unittest.TestCase):

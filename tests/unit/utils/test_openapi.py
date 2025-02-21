@@ -1,4 +1,4 @@
-from unittest import TestCase
+import unittest
 from unittest.mock import Mock
 from fastapi import FastAPI
 from app.utils.openapi import (
@@ -7,7 +7,7 @@ from app.utils.openapi import (
 )
 
 
-class TestCustomOpenAPI(TestCase):
+class TestCustomOpenAPI(unittest.TestCase):
 
     def setUp(self):
         # Create a FastAPI app instance for testing

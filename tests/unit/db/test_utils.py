@@ -1,11 +1,11 @@
-from unittest import TestCase
+import unittest
 from sqlalchemy import inspect
 from app.db.base import Base, engine
 
 from app.db.utils import create_tables, drop_tables
 
 
-class TestDatabaseOperations(TestCase):
+class TestDatabaseOperations(unittest.TestCase):
 
     def setUp(self):
         """Set up the test environment."""

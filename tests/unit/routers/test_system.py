@@ -1,6 +1,5 @@
-from unittest import TestCase
+import unittest
 from unittest.mock import patch
-
 from fastapi import APIRouter, FastAPI
 from fastapi.testclient import TestClient
 
@@ -9,7 +8,7 @@ from app.routers.v1 import system
 API_PREFIX = "/api/v1"
 
 
-class TestSystemRouter(TestCase):
+class TestSystemRouter(unittest.TestCase):
     def setUp(self):
         # Create a FastAPI app and include the router
         self.app = FastAPI()
