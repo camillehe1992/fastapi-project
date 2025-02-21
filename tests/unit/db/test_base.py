@@ -1,66 +1,49 @@
+import importlib
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
-from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 # Import the module to be tested
-from app.db.base import engine, get_db, SessionLocal
+from app.db.base import get_db
 
 
 class TestDatabaseConfig(TestCase):
 
-    # @patch("app.settings.settings")
-    # @patch("app.db.base.create_engine")
-    # def test_database_url_configuration(self, mock_create_engine, mock_settings):
-    #     """
-    #     Test that the correct database URL is used based on the DEBUG setting.
-    #     """
-    #     # Test case 1: DEBUG is True (SQLite)
-    #     mock_settings.DEBUG = True
-    #     mock_settings.SQLITE_CONNECTION_STRING = "sqlite:///test.db"
-    #     mock_settings.POSTGRES_CONNECTION_STRING = (
-    #         "postgresql://user:password@localhost/dbname"
-    #     )
+    @patch("app.db.base.settings.DEBUG", True)  # Mock DEBUG to True
+    @patch(
+        "app.db.base.settings.SQLITE_CONNECTION_STRING", "sqlite:///debug.db"
+    )  # Mock SQLite connection string
+    def test_database_url_debug_mode(self):
+        """
+        Test that SQLALCHEMY_DATABASE_URL is set to SQLITE_CONNECTION_STRING when DEBUG is True.
+        """
+        import app.db.base
 
-    #     # Re-import the module to reinitialize the engine with the mocked settings
-    #     with patch.dict("sys.modules", {"app.db.base": MagicMock()}):
-    #         import app.db.base
+        importlib.reload(app.db.base)
 
-    #         app.db.base.engine = create_engine(mock_settings.SQLITE_CONNECTION_STRING)
+        # Assert
+        self.assertEqual(app.db.base.SQLALCHEMY_DATABASE_URL, "sqlite:///debug.db")
 
-    #     # Verify the engine was created with the SQLite connection string
-    #     # mock_create_engine.assert_called_once_with(
-    #     #     mock_settings.SQLITE_CONNECTION_STRING
-    #     # )
+    @patch("app.db.base.settings.DEBUG", False)  # Mock DEBUG to False
+    @patch(
+        "app.db.base.settings.POSTGRES_CONNECTION_STRING",
+        "postgresql://user:password@localhost/db",
+    )  # Mock Postgres connection string
+    def test_database_url_production_mode(self):
+        """
+        Test that SQLALCHEMY_DATABASE_URL is set to POSTGRES_CONNECTION_STRING when DEBUG is False.
+        """
+        # Reload the module to apply the mocked settings
+        import importlib
+        import app.db.base  # Replace 'your_module' with the actual module name
 
-    #     # Test case 2: DEBUG is False (PostgreSQL)
-    #     mock_create_engine.reset_mock()  # Reset the mock for the next test case
-    #     mock_settings.DEBUG = False
+        importlib.reload(app.db.base)
 
-    #     # Re-import the module to reinitialize the engine with the mocked settings
-    #     with patch.dict("sys.modules", {"app.db.base": MagicMock()}):
-    #         import app.db.base
-
-    #         app.db.base.engine = create_engine(mock_settings.POSTGRES_CONNECTION_STRING)
-
-    #     # Verify the engine was created with the PostgreSQL connection string
-    #     mock_create_engine.assert_called_once_with(
-    #         mock_settings.POSTGRES_CONNECTION_STRING
-    #     )
-
-    # @patch("app.db.base.settings")
-    # @patch("app.db.base.sessionmaker")
-    # def test_sessionmaker_configuration(self, mock_sessionmaker, mock_settings):
-    #     """
-    #     Test that sessionmaker is configured correctly.
-    #     """
-    #     mock_settings.DEBUG = False
-    #     # Verify sessionmaker is called with the correct parameters
-    #     mock_sessionmaker.assert_called_once_with(
-    #         autocommit=False,
-    #         autoflush=False,
-    #         bind=engine,
-    #     )
+        # Assert
+        self.assertEqual(
+            app.db.base.SQLALCHEMY_DATABASE_URL,
+            "postgresql://user:password@localhost/db",
+        )
 
     @patch("app.db.base.SessionLocal")
     def test_get_db(self, mock_session_local):

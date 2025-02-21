@@ -1,32 +1,83 @@
-from unittest.mock import patch
+import unittest
+from unittest.mock import patch, MagicMock
 from fastapi import FastAPI
-from fastapi.testclient import TestClient
+from fastapi.middleware.cors import CORSMiddleware
 
-from app.middlewares import add_cors_middleware
-
-app = FastAPI()
-add_cors_middleware(app)
-
-client = TestClient(app)
+# Import the function to be tested
+from app.middlewares.cors import add_cors_middleware
 
 
-@patch("app.middlewares.settings")
-def test_cors_middleware_debug_mode(mock_settings):
-    """
-    Test that CORS headers are set correctly in debug mode.
-    """
-    mock_settings.DEBUG.return_value = True
-    response = client.options("/", headers={"Origin": "http://example.com"})
-    assert response.headers["access-control-allow-origin"] == "*"
+class TestAddCorsMiddleware(unittest.TestCase):
+    @patch("app.middlewares.settings.DEBUG", True)  # Mock DEBUG to True
+    def test_add_cors_middleware_debug_mode(self):
+        """
+        Test that the CORS middleware is added with allow_origins=["*"] when DEBUG is True.
+        """
+        # Arrange
+        mock_app = MagicMock(spec=FastAPI)
 
+        # Act
+        add_cors_middleware(mock_app)
 
-# @patch("app.middlewares.settings")
-# def test_cors_middleware_production_mode(mock_settings):
-#     """
-#     Test that CORS headers are set correctly in production mode.
-#     """
-#     mock_settings.DEBUG.return_value = False
-#     mock_settings.ORIGINS.return_value = "http://example.com,http://localhost"
+        # Assert
+        mock_app.add_middleware.assert_called_once_with(
+            CORSMiddleware,
+            allow_origins=["*"],  # Should allow all origins in debug mode
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
 
-#     response = client.options("/", headers={"Origin": "http://example.com"})
-#     assert response.headers["access-control-allow-origin"] == "http://example.com"
+    @patch("app.middlewares.settings.DEBUG", False)  # Mock DEBUG to False
+    @patch(
+        "app.middlewares.settings.ORIGINS",
+        ["https://example.com", "https://another.com"],
+    )  # Mock ORIGINS
+    def test_add_cors_middleware_production_mode(self):
+        """
+        Test that the CORS middleware is added with allow_origins from settings.ORIGINS when DEBUG is False.
+        """
+        # Arrange
+        mock_app = MagicMock(spec=FastAPI)
+
+        # Act
+        add_cors_middleware(mock_app)
+
+        # Assert
+        mock_app.add_middleware.assert_called_once_with(
+            CORSMiddleware,
+            allow_origins=[
+                "https://example.com",
+                "https://another.com",
+            ],  # Should use ORIGINS in production mode
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
+    @patch("app.middlewares.settings.DEBUG", False)  # Mock DEBUG to False
+    @patch(
+        "app.middlewares.settings.ORIGINS",
+        ["https://example.com,", "https://another.com,"],
+    )  # Mock ORIGINS with commas
+    def test_add_cors_middleware_origins_stripped(self):
+        """
+        Test that the CORS middleware strips commas from ORIGINS when DEBUG is False.
+        """
+        # Arrange
+        mock_app = MagicMock(spec=FastAPI)
+
+        # Act
+        add_cors_middleware(mock_app)
+
+        # Assert
+        mock_app.add_middleware.assert_called_once_with(
+            CORSMiddleware,
+            allow_origins=[
+                "https://example.com",
+                "https://another.com",
+            ],  # Should strip commas from ORIGINS
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )

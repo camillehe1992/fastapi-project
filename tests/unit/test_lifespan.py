@@ -7,11 +7,10 @@ from fastapi import FastAPI
 from app.lifespan import lifespan
 
 
-@patch("db.utils.logger.info")
-@patch("db.utils.create_tables")
-class TestLifespan(unittest.TestCase):
+@patch("app.lifespan.logger.info")
+@patch("app.lifespan.create_tables")
+class TestLifespan(unittest.IsolatedAsyncioTestCase):
 
-    @pytest.mark.asyncio
     async def test_lifespan(self, mock_create_tables, mock_logger_info):
         # Create a mock FastAPI app
         app = FastAPI()

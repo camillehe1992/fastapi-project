@@ -1,4 +1,3 @@
-# logging_middleware.py
 from fastapi import Request
 
 from logger import logger
