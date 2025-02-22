@@ -6,6 +6,9 @@ on:
       - main # Trigger on pushes to the main branch
   workflow_dispatch: # Allow manual triggering
 
+permissions:
+  content: write
+
 env:
   IMAGE_NAME: fastapi-app
 
