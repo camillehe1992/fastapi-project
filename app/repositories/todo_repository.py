@@ -25,7 +25,7 @@ class TodoRepository:
         db_items = self.session.query(Todo).offset(offset).limit(limit).all()
         return total_count, [TodoOutput(**db_item.__dict__) for db_item in db_items]
 
-    def get_by_id(self, _id: UUID4) -> TodoOutput:
+    def get_by_id(self, _id: UUID4) -> Todo:
         return self.session.query(Todo).filter_by(id=_id).first()
 
     def delete(self, db_item: Type[Todo]) -> bool:
@@ -37,10 +37,10 @@ class TodoRepository:
         db_item = self.session.query(Todo).filter_by(id=_id).first()
         return db_item is not None
 
-    def update(self, db_item: TodoOutput, updated: TodoInput) -> TodoOutput:
+    def update(self, db_item: TodoOutput, updated: TodoInput) -> Todo:
         db_item.title = updated.title
         db_item.completed = updated.completed
         self.session.commit()
         self.session.refresh(db_item)
         updated_item = self.session.query(Todo).filter_by(id=db_item.id).first()
-        return TodoOutput(**updated_item.__dict__)
+        return updated_item

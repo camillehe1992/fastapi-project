@@ -1,8 +1,8 @@
-from pydantic import UUID4
 import unittest
 from unittest.mock import Mock
-
+from pydantic import UUID4
 from sqlalchemy.orm import Session
+
 from app.schemas.user import UserIn
 from app.repositories.user_repository import UserRepository
 

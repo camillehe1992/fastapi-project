@@ -55,21 +55,3 @@ def get_me(user: UserIn = Depends(get_current_user)):
         UserIn: Details of the authenticated user.
     """
     return user
-
-
-@router.delete("/me", status_code=status.HTTP_200_OK, deprecated=True)
-def delete_me(
-    user: UserIn = Depends(get_current_user), session: Session = Depends(get_session)
-):
-    """
-    Delete the authenticated user.
-
-    Args:
-        user (UserIn): Current user's details.
-        session (Session): Database session.
-
-    Returns:
-        None
-    """
-    _service = UserService(session)
-    return _service.delete_user(user.id)
