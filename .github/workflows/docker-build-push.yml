@@ -4,11 +4,52 @@ on:
   push:
     branches:
       - main # Trigger on pushes to the main branch
-  pull_request:
-    branches:
-      - main # Trigger on pull requests to the main branch
+  workflow_dispatch: # Allow manual triggering
+
+env:
+  IMAGE_NAME: fastapi-app
 
 jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.bump.outputs.new_version }}
+    steps:
+      # Check out the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Read the current version from the VERSION file
+      - name: Read current version
+        id: version
+        run: |
+          echo "CURRENT_VERSION=$(cat VERSION)" >> $GITHUB_OUTPUT
+
+      # Bump the version (e.g., patch, minor, or major)
+      - name: Bump version
+        id: bump
+        run: |
+          CURRENT_VERSION=${{ steps.version.outputs.CURRENT_VERSION }}
+          BUMP_TYPE=$(git log -1 --pretty=%B | grep -oE 'bump: (major|minor|patch)' | cut -d' ' -f2 || echo 'patch')
+          NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. -v type=$BUMP_TYPE '{
+            if (type == "major") { $1++; $2=0; $3=0 }
+            else if (type == "minor") { $2++; $3=0 }
+            else if (type == "patch") { $3++ }
+            print $1"."$2"."$3
+          }')
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Bumped version from $CURRENT_VERSION to $NEW_VERSION"
+          echo $NEW_VERSION > VERSION
+
+      # Commit the bumped version
+      - name: Commit bumped version
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add VERSION
+          git commit -m "Bump version to ${{ steps.bump.outputs.new_version }}"
+          git push origin main
+
   build-and-push:
     runs-on: ubuntu-latest
 
@@ -24,24 +65,21 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      # Extract metadata (tags, labels) for Docker
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ secrets.DOCKER_HUB_USERNAME }}/fastapi-app # Replace with your Docker Hub repo name
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-
-      # Build and push the Docker image
+      # Build and push the Docker image with the new version tag
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ needs.bump-version.outputs.new_version }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+      # Output Docker image name and link to Docker Hub
+      - name: Output Docker image details
+        run: |
+          IMAGE_NAME="${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ needs.bump-version.outputs.new_version }}"
+          DOCKER_HUB_LINK="https://hub.docker.com/r/${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}/tags"
+          echo "### Docker Image Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image Name:** \`$IMAGE_NAME\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Docker Hub Link:** [View on Docker Hub]($DOCKER_HUB_LINK)" >> $GITHUB_STEP_SUMMARY
