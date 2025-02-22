@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from core.auth import get_current_user
 from db.base import get_session
+from schemas.response import CommonResponse
 from schemas.user import UserIn, UserLogin, UserRegister, UserInDBBase, Token, UserBase
 from services.user_service import UserService
 
@@ -10,7 +11,9 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post(
-    "/register", status_code=status.HTTP_201_CREATED, response_model=UserInDBBase
+    "/register",
+    status_code=status.HTTP_201_CREATED,
+    response_model=CommonResponse[UserInDBBase],
 )
 def register(data: UserRegister, session: Session = Depends(get_session)):
     """
@@ -24,7 +27,10 @@ def register(data: UserRegister, session: Session = Depends(get_session)):
         UserInDBBase: Details of the registered user.
     """
     _service = UserService(session)
-    return _service.create(data)
+    registered_user = _service.create(data)
+    return CommonResponse[UserInDBBase](
+        message="User is registered successfully.", data=registered_user
+    )
 
 
 @router.post("/login", status_code=status.HTTP_200_OK, response_model=Token)
@@ -43,7 +49,7 @@ def login(data: UserLogin, session: Session = Depends(get_session)):
     return _service.login(data)
 
 
-@router.get("/me", status_code=status.HTTP_200_OK, response_model=UserBase)
+@router.get("/me", status_code=status.HTTP_200_OK, response_model=UserInDBBase)
 def get_me(user: UserIn = Depends(get_current_user)):
     """
     Retrieve information of the authenticated user.
@@ -52,6 +58,6 @@ def get_me(user: UserIn = Depends(get_current_user)):
         user (UserIn): Current user's details.
 
     Returns:
-        UserIn: Details of the authenticated user.
+        UserInDBBase: Details of the authenticated user.
     """
     return user

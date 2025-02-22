@@ -1,9 +1,10 @@
-from typing import Type, Tuple
+from typing import Type, Tuple, List
 from pydantic import UUID4
+
 from sqlalchemy.orm import Session
 
+from schemas.todo import TodoInput, TodoOutput
 from db.models import Todo
-from schemas.todo import TodoInput, TodoList, TodoOutput
 
 
 class TodoRepository:
@@ -11,19 +12,19 @@ class TodoRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def create(self, data: TodoInput) -> TodoOutput:
+    def create(self, data: TodoInput) -> Todo:
         db_item = Todo(**data.model_dump())
         self.session.add(db_item)
         self.session.commit()
         self.session.refresh(db_item)
-        return TodoOutput(**db_item.__dict__)
+        return db_item
 
-    def get_all(self, page: int = 1, page_size: int = 15) -> Tuple[int, TodoList]:
+    def get_all(self, page: int = 1, page_size: int = 15) -> Tuple[int, List[Todo]]:
         offset = (page - 1) * page_size
         limit = page_size
         total_count = self.session.query(Todo).count()
         db_items = self.session.query(Todo).offset(offset).limit(limit).all()
-        return total_count, [TodoOutput(**db_item.__dict__) for db_item in db_items]
+        return total_count, db_items
 
     def get_by_id(self, _id: UUID4) -> Todo:
         return self.session.query(Todo).filter_by(id=_id).first()

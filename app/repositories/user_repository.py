@@ -21,7 +21,7 @@ class UserRepository:
         """
         self.session = session
 
-    def create(self, data: UserRegister, hashed_password: str) -> UserInDBBase:
+    def create(self, data: UserRegister, hashed_password: str) -> User:
         """
         Create a new user.
 
@@ -38,7 +38,7 @@ class UserRepository:
         self.session.add(db_user)
         self.session.commit()
         self.session.refresh(db_user)
-        return UserInDBBase(**db_user.__dict__)
+        return db_user
 
     def user_exists_by_email(self, email: str) -> bool:
         """
@@ -90,7 +90,7 @@ class UserRepository:
             .first()
         )
 
-    def get_user_by_username(self, username: str) -> UserInDB:
+    def get_user_by_username(self, username: str) -> Type[User]:
         """
         Get a user by username.
 

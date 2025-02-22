@@ -1,10 +1,10 @@
-from typing import Dict, Any, Tuple
+from typing import Tuple, List
 from pydantic import UUID4
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from schemas.todo import TodoInput, TodoOutput, TodoList
+from schemas.todo import TodoInput, TodoOutput
 from services.user_service import UserService
 from repositories.todo_repository import TodoRepository
 
@@ -19,16 +19,20 @@ class TodoService:
         #     raise HTTPException(
         #         status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden"
         #     )
+        created_todo = self.repository.create(data)
+        return TodoOutput(**created_todo.as_dict())
 
-        return self.repository.create(data)
+    def get_all(
+        self, page: int = 1, page_size: int = 15
+    ) -> Tuple[int, List[TodoOutput]]:
+        total_count, todos = self.repository.get_all(page=page, page_size=page_size)
+        todos = [TodoOutput(**todo.as_dict()) for todo in todos]
+        return total_count, todos
 
-    def get_all(self, page: int = 1, page_size: int = 15) -> Tuple[int, TodoList]:
-        return self.repository.get_all(page=page, page_size=page_size)
+    def get_by_id(self, _id: UUID4) -> TodoOutput:
+        return TodoOutput(**self.repository.get_by_id(_id).as_dict())
 
-    def get_by_id(self, _id: UUID4) -> Dict[str, Any]:
-        return self.repository.get_by_id(_id)
-
-    def delete(self, _id: int) -> Dict[str, Any]:
+    def delete(self, _id: int) -> TodoOutput:
         if not self.repository.exists_by_id(_id):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -36,7 +40,7 @@ class TodoService:
             )
         todo = self.repository.get_by_id(_id)
         self.repository.delete(todo)
-        return todo
+        return TodoOutput(**todo.as_dict())
 
     def update(self, _id: UUID4, data: TodoInput) -> TodoOutput:
         if not self.repository.exists_by_id(_id):
@@ -46,4 +50,4 @@ class TodoService:
             )
 
         current_todo = self.repository.get_by_id(_id)
-        return self.repository.update(current_todo, data)
+        return TodoOutput(**self.repository.update(current_todo, data).as_dict())
