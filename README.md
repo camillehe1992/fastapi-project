@@ -7,21 +7,26 @@ This is a FastAPI project that demonstrates how to build a RESTful API using Fas
 ```bash
 .
 ├── app
-│   ├── config
-│   ├── core
-│   ├── db
-│   ├── middlewares
-│   ├── repositories
-│   ├── routers
-│   ├── schemas
-│   ├── services
-│   ├── utils
-│   ├── exception_handlers.py
-│   ├── lifespan.py
-│   └── main.py
+│   ├── core
+│   ├── db
+│   ├── middlewares
+│   ├── repositories
+│   ├── routers
+│   ├── schemas
+│   ├── services
+│   ├── utils
+│   ├── exception_handlers.py
+│   ├── lifespan.py
+│   ├── logger.py
+│   ├── main.py
+│   └── settings.py
 ├── tests
+│   ├── integration
+│   ├── unit
+│   └── conftest.py
 ├── .gitignore
 ├── Dockerfile
+├── LICENSE
 ├── README.md
 ├── docker-compose.yaml
 ├── pytest.ini
@@ -162,7 +167,9 @@ FastAPI automatically generates interactive API documentation:
 
 ## Testing
 
-Run the tests using `pytest`:
+### Unit Test
+
+Run the unit tests using `pytest`:
 
 ```bash
 # Activate virtual environment
@@ -171,7 +178,21 @@ source venv/bin/activate
 # Install dev dependencies in virtual environment
 pip install -r requirements-dev.txt
 
-pytest tests/
+pytest tests/unit
+```
+
+### Integration Test
+
+Run the integration tests using `pytest`:
+
+```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Install dev dependencies in virtual environment
+pip install -r requirements-dev.txt
+
+pytest tests/integration
 ```
 
 ## Contributing
