@@ -1,225 +1,225 @@
-from datetime import timedelta
-from uuid import uuid4
-from unittest.mock import patch, Mock
-import pytest
+import unittest
+from unittest.mock import patch, MagicMock
+from uuid import UUID
+from datetime import datetime
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.security import get_password_hash
+from app.repositories.user_repository import UserRepository
+from app.schemas.user import UserRegister, UserLogin, UserInDBBase
 from app.services.user_service import UserService
-from app.schemas.user import UserRegister, UserLogin, UserInDB
-from app.core.security import pwd_context
-from app.settings import settings
 
 
-# Mock data
-MOCK_USER_ID = uuid4()
-MOCK_USERNAME = "testuser"
-MOCK_EMAIL = "testuser@example.com"
-MOCK_PASSWORD = "Securepassword@123"
-MOCK_HASHED_PASSWORD = pwd_context.hash(MOCK_PASSWORD)
+class TestUserService(unittest.TestCase):
 
-# Mock UserInDB object
-MOCK_USER = UserInDB(
-    id=MOCK_USER_ID,
-    username=MOCK_USERNAME,
-    email=MOCK_EMAIL,
-    hashed_password=MOCK_HASHED_PASSWORD,
-    is_superuser=False,
-)
+    def setUp(self):
+        # Mock the SQLAlchemy session
+        self.mock_session = MagicMock(spec=Session)
 
-# Mock UserRegister object
-MOCK_USER_REGISTER = UserRegister(
-    username=MOCK_USERNAME,
-    email=MOCK_EMAIL,
-    password=MOCK_PASSWORD,
-)
+        # Mock the UserRepository
+        self.mock_user_repository = MagicMock(spec=UserRepository)
 
-# Mock UserLogin object
-MOCK_USER_LOGIN = UserLogin(
-    email=MOCK_EMAIL,
-    password=MOCK_PASSWORD,
-)
+        # Initialize the UserService with mocked dependencies
+        self.user_service = UserService(self.mock_session)
+        self.user_service.repository = self.mock_user_repository
 
+        # Common mock data
+        self.user_id = UUID("f47ac10b-58cc-4372-a567-0e02b2c3d479")
+        self.email = "test@example.com"
+        self.username = "testuser"
+        self.password = "Password@123"
+        self.hashed_password = get_password_hash(self.password)
 
-# Fixture for UserService
-@pytest.fixture
-def user_service():
-    mock_session = Mock(spec=Session)
-    return UserService(mock_session)
+        # Mock User instance
+        self.mock_db_user = MagicMock()
+        self.mock_db_user.id = self.user_id
+        self.mock_db_user.email = self.email
+        self.mock_db_user.username = self.username
+        self.mock_db_user.hashed_password = self.hashed_password
+        self.mock_db_user.is_superuser = False
+        self.mock_db_user.as_dict.return_value = {
+            "id": self.user_id,
+            "email": self.email,
+            "username": self.username,
+            "hashed_password": self.hashed_password,
+            "is_superuser": False,
+        }
 
+    def tearDown(self):
+        # Stop all patches
+        patch.stopall()
 
-# Test create method
-@patch("app.services.user_service.UserRepository.create")
-@patch("app.services.user_service.validate_email")
-@patch("app.services.user_service.validate_password")
-@patch("app.services.user_service.UserRepository.user_exists_by_username")
-@patch("app.services.user_service.UserRepository.user_exists_by_email")
-def test_create_user(
-    mock_user_exists_by_email,
-    mock_user_exists_by_username,
-    mock_validate_password,
-    mock_validate_email,
-    mock_create,
-    user_service,
-):
-    # Mock repository methods
-    mock_user_exists_by_email.return_value = False
-    mock_user_exists_by_username.return_value = False
-    mock_create.return_value = MOCK_USER
+    @patch("app.services.user_service.get_password_hash")
+    @patch("app.services.user_service.validate_password")
+    @patch("app.services.user_service.validate_email")
+    def test_create(
+        self, mock_validate_email, mock_validate_password, mock_get_password_hash
+    ):
+        # Arrange
+        user_register = UserRegister(
+            email=self.email, username=self.username, password=self.password
+        )
+        self.mock_user_repository.user_exists_by_email.return_value = False
+        self.mock_user_repository.user_exists_by_username.return_value = False
+        self.mock_user_repository.create.return_value = self.mock_db_user
 
-    # Call the method
-    result = user_service.create(MOCK_USER_REGISTER)
+        # Mock the get_password_hash function to return a consistent value
+        mock_get_password_hash.return_value = self.hashed_password
 
-    # Assertions
-    assert result == MOCK_USER
-    mock_user_exists_by_email.assert_called_once_with(MOCK_EMAIL)
-    mock_user_exists_by_username.assert_called_once_with(MOCK_USERNAME)
-    mock_validate_password.assert_called_once_with(MOCK_PASSWORD)
-    mock_validate_email.assert_called_once_with(MOCK_EMAIL)
-    mock_create.assert_called_once()
+        # Act
+        result = self.user_service.create(user_register)
 
+        # Assert
+        mock_validate_password.assert_called_once_with(self.password)
+        mock_validate_password.assert_called_once_with(self.password)
+        mock_validate_email.assert_called_once_with(self.email)
+        self.mock_user_repository.user_exists_by_email.assert_called_once_with(
+            self.email
+        )
+        self.mock_user_repository.user_exists_by_username.assert_called_once_with(
+            self.username
+        )
+        self.mock_user_repository.create.assert_called_once_with(
+            user_register, self.hashed_password
+        )
+        self.assertEqual(result.id, self.user_id)
+        self.assertEqual(result.email, self.email)
+        self.assertEqual(result.username, self.username)
 
-# Test create method with existing email
-@patch("app.services.user_service.UserRepository.user_exists_by_email")
-def test_create_user_existing_email(mock_user_exists_by_email, user_service):
-    # Mock repository method to return True (email exists)
-    mock_user_exists_by_email.return_value = True
+    @patch("app.services.user_service.validate_password")
+    @patch("app.services.user_service.validate_email")
+    def test_create_email_already_registered(
+        self, mock_validate_email, mock_validate_password
+    ):
+        # Arrange
+        user_register = UserRegister(
+            email=self.email, username=self.username, password=self.password
+        )
+        self.mock_user_repository.user_exists_by_email.return_value = True
 
-    # Call the method and expect an exception
-    with pytest.raises(HTTPException) as exc_info:
-        user_service.create(MOCK_USER_REGISTER)
+        # Act & Assert
+        with self.assertRaises(HTTPException) as context:
+            self.user_service.create(user_register)
+        self.assertEqual(context.exception.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            context.exception.detail, f"Email {self.email} already registered"
+        )
 
-    # Assertions
-    assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
-    assert exc_info.value.detail == f"Email {MOCK_EMAIL} already registered"
+    @patch("app.services.user_service.validate_password")
+    @patch("app.services.user_service.validate_email")
+    def test_create_username_already_registered(
+        self, mock_validate_email, mock_validate_password
+    ):
+        # Arrange
+        user_register = UserRegister(
+            email=self.email, username=self.username, password=self.password
+        )
+        self.mock_user_repository.user_exists_by_email.return_value = False
+        self.mock_user_repository.user_exists_by_username.return_value = True
 
+        # Act & Assert
+        with self.assertRaises(HTTPException) as context:
+            self.user_service.create(user_register)
+        self.assertEqual(context.exception.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            context.exception.detail, f"Username {self.username} already registered"
+        )
 
-# Test create method with existing username
-@patch("app.services.user_service.UserRepository.user_exists_by_username")
-@patch("app.services.user_service.UserRepository.user_exists_by_email")
-def test_create_user_existing_username(
-    mock_user_exists_by_email, mock_user_exists_by_username, user_service
-):
-    # Mock repository methods
-    mock_user_exists_by_email.return_value = False
-    mock_user_exists_by_username.return_value = True
+    @patch("app.services.user_service.pwd_context")
+    @patch("app.services.user_service.create_access_token")
+    @patch("app.services.user_service.DateTimeHelper")
+    def test_login(
+        self, mock_datetime_helper, mock_create_access_token, mock_pwd_context
+    ):
+        # Arrange
+        user_login = UserLogin(email=self.email, password=self.password)
+        self.mock_user_repository.get_user_by_email.return_value = self.mock_db_user
+        mock_pwd_context.verify.return_value = True
 
-    # Call the method and expect an exception
-    with pytest.raises(HTTPException) as exc_info:
-        user_service.create(MOCK_USER_REGISTER)
+        mock_datetime_instance = MagicMock()
+        mock_datetime_instance.now.return_value = datetime.now()
+        mock_datetime_instance.format.return_value = "2023-10-01T00:00:00Z"
+        mock_datetime_helper.return_value = mock_datetime_instance
 
-    # Assertions
-    assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
-    assert exc_info.value.detail == f"Username {MOCK_USERNAME} already registered"
+        mock_create_access_token.return_value = "mock_access_token"
 
+        # Act
+        result = self.user_service.login(user_login)
 
-# Test login method
-@patch("app.services.user_service.create_access_token")
-@patch("app.services.user_service.pwd_context.verify")
-@patch("app.services.user_service.UserRepository.get_user_by_email")
-def test_login_user(
-    mock_get_user_by_email, mock_pwd_verify, mock_create_access_token, user_service
-):
-    # Mock repository method to return a user
-    mock_get_user_by_email.return_value = MOCK_USER
+        # Assert
+        self.mock_user_repository.get_user_by_email.assert_called_once_with(self.email)
+        mock_pwd_context.verify.assert_called_once_with(
+            self.password, self.hashed_password
+        )
+        mock_create_access_token.assert_called_once()
+        self.assertEqual(result["access_token"], "mock_access_token")
+        self.assertEqual(result["token_type"], "bearer")
+        self.assertEqual(result["expired_at"], "2023-10-01T00:00:00Z")
 
-    # Mock password verification
-    mock_pwd_verify.return_value = True
+    def test_login_incorrect_email_or_password(self):
+        # Arrange
+        user_login = UserLogin(email=self.email, password=self.password)
+        self.mock_user_repository.get_user_by_email.return_value = None
 
-    # Mock token creation
-    mock_create_access_token.return_value = "mock_token"
+        # Act & Assert
+        with self.assertRaises(HTTPException) as context:
+            self.user_service.login(user_login)
+        self.assertEqual(context.exception.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(context.exception.detail, "Incorrect email or password")
 
-    # Call the method
-    result = user_service.login(MOCK_USER_LOGIN)
+    def test_is_superuser(self):
+        # Arrange
+        self.mock_user_repository.user_exists_by_id.return_value = True
+        self.mock_user_repository.get_user_object_by_id.return_value = self.mock_db_user
 
-    # Assertions
-    assert result == {"access_token": "mock_token", "token_type": "bearer"}
-    mock_get_user_by_email.assert_called_once_with(MOCK_EMAIL)
-    mock_pwd_verify.assert_called_once_with(MOCK_PASSWORD, MOCK_HASHED_PASSWORD)
-    mock_create_access_token.assert_called_once_with(
-        data={"sub": MOCK_EMAIL},
-        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
-    )
+        # Act
+        result = self.user_service.is_superuser(self.user_id)
 
+        # Assert
+        self.mock_user_repository.user_exists_by_id.assert_called_once_with(
+            self.user_id
+        )
+        self.mock_user_repository.get_user_object_by_id.assert_called_once_with(
+            self.user_id
+        )
+        self.assertFalse(result)
 
-# Test login method with incorrect username or password
-@patch("app.services.user_service.UserRepository.get_user_by_email")
-def test_login_user_incorrect_credentials(mock_get_user_by_email, user_service):
-    # Mock repository method to return None (user not found)
-    mock_get_user_by_email.return_value = None
+    def test_is_superuser_user_not_found(self):
+        # Arrange
+        self.mock_user_repository.user_exists_by_id.return_value = False
 
-    # Call the method and expect an exception
-    with pytest.raises(HTTPException) as exc_info:
-        user_service.login(MOCK_USER_LOGIN)
+        # Act & Assert
+        with self.assertRaises(HTTPException) as context:
+            self.user_service.is_superuser(self.user_id)
+        self.assertEqual(context.exception.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(context.exception.detail, f"User {self.user_id} not found")
 
-    # Assertions
-    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
-    assert exc_info.value.detail == "Incorrect email or password"
+    def test_delete_user(self):
+        # Arrange
+        self.mock_user_repository.user_exists_by_id.return_value = True
+        self.mock_user_repository.get_user_object_by_id.return_value = self.mock_db_user
 
+        # Act
+        result = self.user_service.delete_user(self.user_id)
 
-# Test is_superuser method
-@patch("app.services.user_service.UserRepository.get_user_object_by_id")
-@patch("app.services.user_service.UserRepository.user_exists_by_id")
-def test_is_superuser(mock_user_exists_by_id, mock_get_user_object_by_id, user_service):
-    # Mock repository methods
-    mock_user_exists_by_id.return_value = True
-    mock_get_user_object_by_id.return_value = MOCK_USER
+        # Assert
+        self.mock_user_repository.user_exists_by_id.assert_called_once_with(
+            self.user_id
+        )
+        self.mock_user_repository.get_user_object_by_id.assert_called_once_with(
+            self.user_id
+        )
+        self.mock_user_repository.delete_user.assert_called_once_with(self.mock_db_user)
+        self.assertTrue(result)
 
-    # Call the method
-    result = user_service.is_superuser(MOCK_USER_ID)
+    def test_delete_user_not_found(self):
+        # Arrange
+        self.mock_user_repository.user_exists_by_id.return_value = False
 
-    # Assertions
-    assert result is False
-    mock_user_exists_by_id.assert_called_once_with(MOCK_USER_ID)
-    mock_get_user_object_by_id.assert_called_once_with(MOCK_USER_ID)
-
-
-# Test is_superuser method with non-existent user
-@patch("app.services.user_service.UserRepository.user_exists_by_id")
-def test_is_superuser_not_found(mock_user_exists_by_id, user_service):
-    # Mock repository method to return False (user not found)
-    mock_user_exists_by_id.return_value = False
-
-    # Call the method and expect an exception
-    with pytest.raises(HTTPException) as exc_info:
-        user_service.is_superuser(MOCK_USER_ID)
-
-    # Assertions
-    assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
-    assert exc_info.value.detail == f"User {MOCK_USER_ID} not found"
-
-
-# Test delete_user method
-@patch("app.services.user_service.UserRepository.delete_user")
-@patch("app.services.user_service.UserRepository.get_user_object_by_id")
-@patch("app.services.user_service.UserRepository.user_exists_by_id")
-def test_delete_user(
-    mock_user_exists_by_id, mock_get_user_object_by_id, mock_delete_user, user_service
-):
-    # Mock repository methods
-    mock_user_exists_by_id.return_value = True
-    mock_get_user_object_by_id.return_value = MOCK_USER
-
-    # Call the method
-    result = user_service.delete_user(MOCK_USER_ID)
-
-    # Assertions
-    assert result is True
-    mock_user_exists_by_id.assert_called_once_with(MOCK_USER_ID)
-    mock_get_user_object_by_id.assert_called_once_with(MOCK_USER_ID)
-    mock_delete_user.assert_called_once_with(MOCK_USER)
-
-
-# Test delete_user method with non-existent user
-@patch("app.services.user_service.UserRepository.user_exists_by_id")
-def test_delete_user_not_found(mock_user_exists_by_id, user_service):
-    # Mock repository method to return False (user not found)
-    mock_user_exists_by_id.return_value = False
-
-    # Call the method and expect an exception
-    with pytest.raises(HTTPException) as exc_info:
-        user_service.delete_user(MOCK_USER_ID)
-
-    # Assertions
-    assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
-    assert exc_info.value.detail == f"User {MOCK_USER_ID} not found"
+        # Act & Assert
+        with self.assertRaises(HTTPException) as context:
+            self.user_service.delete_user(self.user_id)
+        self.assertEqual(context.exception.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(context.exception.detail, f"User {self.user_id} not found")

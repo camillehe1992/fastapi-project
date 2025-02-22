@@ -13,7 +13,7 @@ from app.schemas.user import (
 )
 
 
-class TestPydanticModels(unittest.TestCase):
+class TestUserModels(unittest.TestCase):
     def test_user_base(self):
         """Test the UserBase model."""
         user = UserBase(
@@ -101,9 +101,14 @@ class TestPydanticModels(unittest.TestCase):
 
     def test_token(self):
         """Test the Token model."""
-        token = Token(access_token="access_token_123", token_type="bearer")
+        token = Token(
+            access_token="access_token_123",
+            token_type="bearer",
+            expired_at="2025-02-22 08:38:19 UTC+0000",
+        )
         self.assertEqual(token.access_token, "access_token_123")
         self.assertEqual(token.token_type, "bearer")
+        self.assertEqual(token.expired_at, "2025-02-22 08:38:19 UTC+0000")
 
     def test_validation_errors(self):
         """Test validation errors for required fields."""

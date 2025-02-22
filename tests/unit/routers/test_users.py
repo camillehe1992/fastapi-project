@@ -16,7 +16,7 @@ from app.schemas.user import (
 from app.routers.v1 import users
 
 
-class TestUserEndpoints(unittest.TestCase):
+class TestUserRouter(unittest.TestCase):
 
     def setUp(self):
         # Common mock objects
@@ -41,6 +41,8 @@ class TestUserEndpoints(unittest.TestCase):
             id=UUID4("f47ac10b-58cc-4372-a567-0e02b2c3d479"),
             email="test@example.com",
             username="Test User",
+            is_active=True,
+            is_superuser=False,
         )
 
         self.mock_user = UserIn(
@@ -62,7 +64,9 @@ class TestUserEndpoints(unittest.TestCase):
             email="test@example.com", password="password123", username="Test User"
         )
 
-        self.mock_user_service_instance.create.return_value = self.mock_created_user
+        self.mock_user_service_instance.create.return_value = (
+            self.mock_created_user.model_dump()
+        )
 
         # Act
         response = users.register(data=user_register_data, session=self.mock_session)
@@ -72,16 +76,19 @@ class TestUserEndpoints(unittest.TestCase):
         self.mock_user_service_instance.create.assert_called_once_with(
             user_register_data
         )
-
-        self.assertIsInstance(response, UserInDBBase)
-        self.assertEqual(response.id, self.mock_created_user.id)
-        self.assertEqual(response.email, self.mock_created_user.email)
-        self.assertEqual(response.username, self.mock_created_user.username)
+        self.assertEqual(response.message, "User is registered successfully.")
+        self.assertEqual(response.data.id, self.mock_created_user.id)
+        self.assertEqual(response.data.email, self.mock_created_user.email)
+        self.assertEqual(response.data.username, self.mock_created_user.username)
 
     def test_login(self):
         # Arrange
         user_login_data = UserLogin(email="test@example.com", password="password123")
-        mock_token = Token(access_token="mock_access_token", token_type="bearer")
+        mock_token = Token(
+            access_token="mock_access_token",
+            token_type="bearer",
+            expired_at="1970-01-01 00:00:00 UTC+0000",
+        )
         self.mock_user_service_instance.login.return_value = mock_token
 
         # Act
@@ -94,6 +101,7 @@ class TestUserEndpoints(unittest.TestCase):
         self.assertIsInstance(response, Token)
         self.assertEqual(response.access_token, "mock_access_token")
         self.assertEqual(response.token_type, "bearer")
+        self.assertEqual(response.expired_at, "1970-01-01 00:00:00 UTC+0000")
 
     def test_get_me(self):
         # Arrange
