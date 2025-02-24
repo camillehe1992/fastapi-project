@@ -7,7 +7,7 @@ on:
   workflow_dispatch: # Allow manual triggering
 
 permissions:
-  content: write
+  contents: write
 
 env:
   IMAGE_NAME: fastapi-app
