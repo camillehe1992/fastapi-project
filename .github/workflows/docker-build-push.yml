@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - app/**
+      - Dockerfile
+      - docker-compose.yaml
+      - requirements.txt
   workflow_dispatch:
 
 permissions:

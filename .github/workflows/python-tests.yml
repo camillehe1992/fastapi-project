@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+    paths:
+      - app/**
+      - tests/**
+      - requirements-dev.txt
+      - requirements.txt
+      - pytest.ini
   workflow_dispatch:
 
 jobs:
