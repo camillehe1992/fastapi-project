@@ -46,6 +46,10 @@ jobs:
           pytest tests/unit --cov=app --cov-report=term
           mv .coverage .coverage.unit
 
+      - name: Debug working directory
+        run: |
+          ls -la .coverage.unit
+
       - name: Upload unit test coverage data
         uses: actions/upload-artifact@v4
         with:
@@ -83,6 +87,10 @@ jobs:
           source venv/bin/activate
           pytest tests/integration --cov=app --cov-report=term
           mv .coverage .coverage.integration
+
+      - name: Debug working directory
+        run: |
+          ls -la .coverage.unit
 
       - name: Upload integration test coverage report
         uses: actions/upload-artifact@v4
