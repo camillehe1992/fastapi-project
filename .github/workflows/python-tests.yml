@@ -29,7 +29,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: venv
-          key: venv-${{ runner.os }}-${{ hashFiles('requirements-dev.txt') }}
+          key: venv-${{ runner.os }}-${{ github.run_id }}-${{ github.ref }}-v1-${{ hashFiles('requirements-dev.txt') }}
           restore-keys: |
             venv-${{ runner.os }}-
 
@@ -43,7 +43,7 @@ jobs:
       - name: Run unit tests with coverage
         run: |
           source venv/bin/activate
-          pytest tests/unit --cov=app --cov-report=
+          pytest tests/unit --cov=app --cov-report=term
           mv .coverage .coverage.unit
 
       - name: Upload unit test coverage data
@@ -67,7 +67,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: venv
-          key: venv-${{ runner.os }}-${{ hashFiles('requirements-dev.txt') }}
+          key: venv-${{ runner.os }}-${{ github.run_id }}-${{ github.ref }}-v1-${{ hashFiles('requirements-dev.txt') }}
           restore-keys: |
             venv-${{ runner.os }}-
 
@@ -81,7 +81,7 @@ jobs:
       - name: Run integration tests with coverage
         run: |
           source venv/bin/activate
-          pytest tests/integration --cov=app --cov-report=
+          pytest tests/integration --cov=app --cov-report=term
           mv .coverage .coverage.integration
 
       - name: Upload integration test coverage report
