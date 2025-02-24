@@ -56,6 +56,11 @@ jobs:
           git commit -m "Bump version to ${{ env.NEW_VERSION }}"
           git push origin main
 
+      - name: Output VERSION to GitHub Summary
+        run: |
+          echo "### Bumped Version" >> $GITHUB_STEP_SUMMARY
+          echo "- **New Version:** \`$(cat VERSION)\`" >> $GITHUB_STEP_SUMMARY
+
   build-and-push:
     runs-on: ubuntu-latest
     needs: bump-version
