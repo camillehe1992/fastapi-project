@@ -42,13 +42,14 @@ jobs:
       - name: Run unit tests with coverage
         run: |
           source venv/bin/activate
-          pytest tests/unit --cov=app --cov-report=xml:coverage-unit.xml
+          pytest tests/unit --cov=app --cov-report=
+          mv .coverage .coverage.unit
 
       - name: Upload unit test coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-unit
-          path: coverage-unit.xml
+          path: .coverage.unit
 
   integration-tests:
     runs-on: ubuntu-latest
@@ -79,13 +80,14 @@ jobs:
       - name: Run integration tests with coverage
         run: |
           source venv/bin/activate
-          pytest tests/integration --cov=app --cov-report=xml:coverage-integration.xml
+          pytest tests/integration --cov=app --cov-report=
+          mv .coverage .coverage.integration
 
       - name: Upload integration test coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-integration
-          path: coverage-integration.xml
+          path: .coverage.integration
 
   combine-coverage:
     runs-on: ubuntu-latest
@@ -105,8 +107,8 @@ jobs:
 
       - name: Combine coverage reports
         run: |
-          pip install coverage
-          coverage combine coverage-reports/coverage-unit.xml coverage-reports/coverage-integration.xml
+          source venv/bin/activate
+          coverage combine coverage-reports/.coverage.unit coverage-reports/.coverage.integration
           coverage xml -o combined-coverage.xml
 
       - name: Upload combined coverage report
