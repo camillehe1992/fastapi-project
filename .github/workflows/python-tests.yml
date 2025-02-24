@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/python-tests.yml
       - app/**
       - tests/**
       - requirements-dev.txt
@@ -46,7 +47,7 @@ jobs:
           mv .coverage .coverage.unit
 
       - name: Upload unit test coverage data
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-unit
           path: .coverage.unit
@@ -84,7 +85,7 @@ jobs:
           mv .coverage .coverage.integration
 
       - name: Upload integration test coverage report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-integration
           path: .coverage.integration
@@ -94,13 +95,13 @@ jobs:
     needs: [unit-tests, integration-tests]
     steps:
       - name: Download unit test coverage data
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: coverage-unit
           path: coverage-reports
 
       - name: Download integration test coverage data
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: coverage-integration
           path: coverage-reports
@@ -116,7 +117,7 @@ jobs:
           coverage xml -o combined-coverage.xml
 
       - name: Upload combined coverage report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: combined-coverage
           path: combined-coverage.xml
