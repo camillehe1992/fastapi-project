@@ -3,8 +3,8 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - main # Trigger on pushes to the main branch
-  workflow_dispatch: # Allow manual triggering
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,21 +18,17 @@ jobs:
     outputs:
       new_version: ${{ steps.bump.outputs.new_version }}
     steps:
-      # Check out the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Read the current version from the VERSION file
       - name: Read current version
         id: version
-        run: |
-          echo "CURRENT_VERSION=$(cat VERSION)" >> $GITHUB_OUTPUT
+        run: echo "CURRENT_VERSION=$(cat VERSION)" >> $GITHUB_ENV
 
-      # Bump the version (e.g., patch, minor, or major)
       - name: Bump version
         id: bump
         run: |
-          CURRENT_VERSION=${{ steps.version.outputs.CURRENT_VERSION }}
+          CURRENT_VERSION=${{ env.CURRENT_VERSION }}
           BUMP_TYPE=$(git log -1 --pretty=%B | grep -oE 'bump: (major|minor|patch)' | cut -d' ' -f2 || echo 'patch')
           NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. -v type=$BUMP_TYPE '{
             if (type == "major") { $1++; $2=0; $3=0 }
@@ -40,48 +36,47 @@ jobs:
             else if (type == "patch") { $3++ }
             print $1"."$2"."$3
           }')
-          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "Bumped version from $CURRENT_VERSION to $NEW_VERSION"
-          echo $NEW_VERSION > VERSION
+          if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
+            echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+            echo $NEW_VERSION > VERSION
+          else
+            echo "NEW_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+          fi
 
-      # Commit the bumped version
       - name: Commit bumped version
+        if: ${{ env.NEW_VERSION != env.CURRENT_VERSION }}
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add VERSION
-          git commit -m "Bump version to ${{ steps.bump.outputs.new_version }}"
+          git commit -m "Bump version to ${{ env.NEW_VERSION }}"
           git push origin main
 
   build-and-push:
     runs-on: ubuntu-latest
     needs: bump-version
     steps:
-      # Check out the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      # Build and push the Docker image with the new version tag
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ needs.bump-version.outputs.new_version }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEW_VERSION }}
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
 
-      # Output Docker image name and link to Docker Hub
       - name: Output Docker image details
         run: |
-          IMAGE_NAME="${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ needs.bump-version.outputs.new_version }}"
+          IMAGE_NAME="${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NEW_VERSION }}"
           DOCKER_HUB_LINK="https://hub.docker.com/r/${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}/tags"
           echo "### Docker Image Details" >> $GITHUB_STEP_SUMMARY
           echo "- **Image Name:** \`$IMAGE_NAME\`" >> $GITHUB_STEP_SUMMARY
