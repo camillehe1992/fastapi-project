@@ -1,7 +1,7 @@
+import uuid
 import unittest
 from unittest.mock import patch, MagicMock
 from datetime import datetime
-from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from app.schemas.todo import TodoInput, TodoOutput
@@ -17,7 +17,7 @@ class TestCreateNewTodo(unittest.TestCase):
         # Common mock objects
         self.mock_session = MagicMock(spec=Session)
         self.mock_current_user = MagicMock(spec=UserInDBBase)
-        self.mock_current_user.id = UUID4("f47ac10b-58cc-4372-a567-0e02b2c3d479")
+        self.mock_current_user.id = uuid.uuid4()
 
         # Patch get_session and get_current_user
         self.mock_get_session = patch("app.routers.v1.todos.get_session").start()
@@ -30,7 +30,7 @@ class TestCreateNewTodo(unittest.TestCase):
 
         # Create a valid TodoOutput object
         self.mock_todo_output = TodoOutput(
-            id=UUID4("c9bf9e57-1685-4c89-bafb-ff5af830be8a"),
+            id=uuid.uuid4(),
             user_id=self.mock_current_user.id,
             title="Test Todo",
             completed=False,
@@ -38,7 +38,7 @@ class TestCreateNewTodo(unittest.TestCase):
             updated_at=datetime.now(),
         )
         self.mock_another_todo_output = TodoOutput(
-            id=UUID4("c9bf9e57-1685-4c89-bafb-ff5af830be8a"),
+            id=uuid.uuid4(),
             user_id=self.mock_current_user.id,
             title="Updated Todo",
             completed=False,
@@ -52,7 +52,8 @@ class TestCreateNewTodo(unittest.TestCase):
             user_id=self.mock_current_user.id,
         )
 
-        self.todo_id = UUID4("c9bf9e57-1685-4c89-bafb-ff5af830be8a")
+        self.todo_id = self.mock_todo_output.id
+        self.update_todo_id = self.mock_another_todo_output.id
 
         # Patch TodoService
         self.mock_todo_service = patch("app.routers.v1.todos.TodoService").start()
@@ -154,16 +155,16 @@ class TestCreateNewTodo(unittest.TestCase):
 
         # Act
         response = todos.update_todo(
-            _id=self.todo_id, data=self.todo_input, session=self.mock_session
+            _id=self.update_todo_id, data=self.todo_input, session=self.mock_session
         )
 
         # Assert
         self.mock_todo_service.assert_called_once_with(self.mock_session)
         self.mock_todo_service_instance.update.assert_called_once_with(
-            self.todo_id, self.todo_input
+            self.update_todo_id, self.todo_input
         )
 
         self.assertEqual(response.message, "Todo is updated successfully.")
-        self.assertEqual(response.data.id, self.todo_id)
+        self.assertEqual(response.data.id, self.update_todo_id)
         self.assertEqual(response.data.title, "Updated Todo")
         self.assertEqual(response.data.completed, False)

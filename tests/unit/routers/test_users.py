@@ -1,6 +1,6 @@
+import uuid
 import unittest
 from unittest.mock import patch, MagicMock
-from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from app.schemas.user import (
@@ -22,7 +22,7 @@ class TestUserRouter(unittest.TestCase):
         # Common mock objects
         self.mock_session = MagicMock(spec=Session)
         self.mock_current_user = MagicMock(spec=UserIn)
-        self.mock_current_user.id = UUID4("f47ac10b-58cc-4372-a567-0e02b2c3d479")
+        self.mock_current_user.id = uuid.uuid4()
 
         # Patch get_session and get_current_user
         self.mock_get_session = patch("app.routers.v1.users.get_session").start()
@@ -38,7 +38,7 @@ class TestUserRouter(unittest.TestCase):
         self.mock_user_service_instance = self.mock_user_service.return_value
 
         self.mock_created_user = UserInDBBase(
-            id=UUID4("f47ac10b-58cc-4372-a567-0e02b2c3d479"),
+            id=uuid.uuid4(),
             email="test@example.com",
             username="Test User",
             is_active=True,
@@ -46,7 +46,7 @@ class TestUserRouter(unittest.TestCase):
         )
 
         self.mock_user = UserIn(
-            id=UUID4("f47ac10b-58cc-4372-a567-0e02b2c3d479"),
+            id=uuid.uuid4(),
             email="test@example.com",
             username="Test User",
             password="Test@Password123",
