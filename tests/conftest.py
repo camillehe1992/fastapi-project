@@ -5,8 +5,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.db.utils import create_tables, drop_tables
 from app.db.base import get_session
-from app.db.models import Base
 from app.main import app
 
 # Configure a test database
@@ -17,33 +17,33 @@ TestingSessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=engine, class_=AsyncSession
 )
 
-
-# Fixture to create a new database session for each test
-@pytest.fixture()
-async def session():
-    # Create all database tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
-
-    # Provide a session for the test
-    async with TestingSessionLocal() as session:
-        yield session
-
-    # Drop all database tables after the test
-
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+# Create all tables
+create_tables()
 
 
-# Fixture to override the get_session dependency and provide a TestClient
+# Fixture to override the get_session dependency
 @pytest.fixture
-def client(session):
-    async def override_get_session():
-        yield session
+def override_get_session():
+    try:
+        db = TestingSessionLocal()
+        yield db
+    finally:
+        db.close()
 
-    app.dependency_overrides[get_session] = override_get_session
-    return TestClient(app)
+
+# Fixture to provide a TestClient instance
+@pytest.fixture
+def client(override_get_session):
+    app.dependency_overrides[get_session] = lambda: override_get_session
+    with TestClient(app) as test_client:
+        yield test_client
+
+
+# Fixture to clean up the database after tests
+@pytest.fixture(autouse=True)
+def cleanup():
+    yield
+    drop_tables()
 
 
 # Function to generate a random username

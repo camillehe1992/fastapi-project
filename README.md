@@ -118,7 +118,7 @@ cd fastapi-project
 ### 2. Install Dependencies
 
 ```bash
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
