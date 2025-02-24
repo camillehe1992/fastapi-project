@@ -4,6 +4,7 @@
 ![Python](https://img.shields.io/badge/python-3.11-blue.svg?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Docker](https://img.shields.io/docker/pulls/camillehe/fastapi)
+[![codecov](https://codecov.io/gh/camillehe/fastapi-project/branch/main/graph/badge.svg)](https://codecov.io/gh/camillehe/fastapi-project)
 
 This is a FastAPI project that demonstrates how to build a RESTful API using FastAPI. The project includes a basic structure for organizing your code, along with instructions for running the application locally or in a Docker container.
 
