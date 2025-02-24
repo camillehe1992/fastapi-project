@@ -45,12 +45,8 @@ jobs:
           pytest tests/unit --cov=app --cov-report=
           mv .coverage .coverage.unit
 
-      - name: Debug working directory
-        run: |
-          ls -la
-
       - name: Upload unit test coverage data
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: coverage-unit
           path: .coverage.unit
@@ -88,7 +84,7 @@ jobs:
           mv .coverage .coverage.integration
 
       - name: Upload integration test coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: coverage-integration
           path: .coverage.integration
@@ -98,16 +94,20 @@ jobs:
     needs: [unit-tests, integration-tests]
     steps:
       - name: Download unit test coverage data
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: coverage-unit
           path: coverage-reports
 
       - name: Download integration test coverage data
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: coverage-integration
           path: coverage-reports
+
+      - name: Debug working directory
+        run: |
+          ls -la
 
       - name: Combine coverage data
         run: |
