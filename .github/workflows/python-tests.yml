@@ -35,25 +35,21 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m venv venv
-          source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements-dev.txt
 
       - name: Run unit tests with coverage
         run: |
-          source venv/bin/activate
-          pytest tests/unit --cov=app --cov-report=term
-          mv .coverage .coverage.unit
+          pytest --cov=./ --cov-report=xml:.coverage.unit tests/unit/
 
       - name: Debug working directory
         run: |
           ls -la .coverage.unit
 
-      - name: Upload unit test coverage data
+      - name: Upload unit test coverage
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-unit
+          name: unit-coverage
           path: .coverage.unit
 
   integration-tests:
@@ -77,60 +73,64 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
       - name: Run integration tests with coverage
         run: |
-          source venv/bin/activate
-          pytest tests/integration --cov=app --cov-report=term
-          mv .coverage .coverage.integration
+          pytest --cov=./ --cov-report=xml:.coverage.integration tests/integration/
 
-      - name: Debug working directory
-        run: |
-          ls -la .coverage.unit
-
-      - name: Upload integration test coverage report
+      - name: Upload integration test coverage
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-integration
+          name: integration-coverage
           path: .coverage.integration
 
   combine-coverage:
     runs-on: ubuntu-latest
     needs: [unit-tests, integration-tests]
     steps:
-      - name: Download unit test coverage data
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install pytest-cov
+
+      - name: Download unit test coverage
         uses: actions/download-artifact@v4
         with:
-          name: coverage-unit
-          path: coverage-reports
+          name: unit-coverage
+          path: ./
 
-      - name: Download integration test coverage data
+      - name: Download integration test coverage
         uses: actions/download-artifact@v4
         with:
-          name: coverage-integration
-          path: coverage-reports
+          name: integration-coverage
+          path: ./
 
-      - name: Debug working directory
+      - name: Combine coverage reports
         run: |
-          ls -la
+          coverage combine .coverage.unit .coverage.integration
+          coverage xml -o .coverage.combined
 
-      - name: Combine coverage data
+      - name: Output coverage to GitHub Summary
         run: |
-          source venv/bin/activate
-          coverage combine coverage-reports/.coverage.unit coverage-reports/.coverage.integration
-          coverage xml -o combined-coverage.xml
+          echo "### Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Combined coverage report generated." >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          coverage report >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload combined coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: combined-coverage
-          path: combined-coverage.xml
-
-      - name: Upload coverage to Codecov
-        run: |
-          source venv/bin/activate
-          codecov --file=combined-coverage.xml
+          path: .coverage.combined
