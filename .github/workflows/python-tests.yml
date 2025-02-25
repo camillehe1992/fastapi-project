@@ -32,19 +32,11 @@ jobs:
 
       - name: Run unit tests with coverage
         run: |
-          pytest --cov=app --cov-report=xml:.coverage.unit tests/unit/
-          pwd
-          ls -la .coverage.unit  # Confirm the file is generated
-
-      - name: Upload unit test coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-coverage
-          path: .coverage.unit
+          pytest --cov=app --cov-report=term tests/unit/
 
       - name: Output unit test report to job summary
         run: |
-          echo "### Unit Test Report" >> $GITHUB_STEP_SUMMARY
+          echo "### Unit Test Coverage Report" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
           pytest --cov=app --cov-report=term tests/unit/ >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
@@ -67,18 +59,11 @@ jobs:
 
       - name: Run integration tests with coverage
         run: |
-          pytest --cov=app --cov-report=xml:.coverage.integration tests/integration/
-          pwd
-
-      - name: Upload integration test coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: integration-coverage
-          path: .coverage.integration
+          pytest --cov=app --cov-report=term tests/integration/
 
       - name: Output integration test report to job summary
         run: |
-          echo "### Integration Test Report" >> $GITHUB_STEP_SUMMARY
+          echo "### Integration Test Coverage Report" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
           pytest --cov=app --cov-report=term tests/integration/ >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
