@@ -40,7 +40,7 @@ jobs:
 
       - name: Run unit tests with coverage
         run: |
-          pytest --cov=./ --cov-report=xml:.coverage.unit tests/unit/
+          pytest --cov=app --cov-report=xml:.coverage.unit tests/unit/
 
           ls -la .coverage.unit  # Confirm the file is generated
 
@@ -52,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: unit-coverage
-          path: .coverage.unit
+          path: ./.coverage.unit
 
   integration-tests:
     runs-on: ubuntu-latest
@@ -80,13 +80,13 @@ jobs:
 
       - name: Run integration tests with coverage
         run: |
-          pytest --cov=./ --cov-report=xml:.coverage.integration tests/integration/
+          pytest --cov=app --cov-report=xml:.coverage.integration tests/integration/
 
       - name: Upload integration test coverage
         uses: actions/upload-artifact@v4
         with:
           name: integration-coverage
-          path: .coverage.integration
+          path: ./.coverage.integration
 
   combine-coverage:
     runs-on: ubuntu-latest
