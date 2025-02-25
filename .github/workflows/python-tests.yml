@@ -42,9 +42,11 @@ jobs:
         run: |
           pytest --cov=./ --cov-report=xml:.coverage.unit tests/unit/
 
+          ls -la .coverage.unit  # Confirm the file is generated
+
       - name: Debug working directory
         run: |
-          ls -la .coverage.unit
+          find . -name ".coverage.unit"
 
       - name: Upload unit test coverage
         uses: actions/upload-artifact@v4
