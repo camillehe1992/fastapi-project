@@ -31,7 +31,7 @@ jobs:
       - name: Generate cache key
         id: cache-key
         run: |
-          echo "key=deps-${{ runner.os }}-${{ hashFiles('requirements-dev.txt') }}" >> $GITHUB_OUTPUT
+          echo "key=deps-${{ runner.os }}-${{ hashFiles('**/requirements-dev.txt') }}" >> $GITHUB_OUTPUT
 
       - name: Cache Python dependencies
         uses: actions/cache@v3
@@ -40,12 +40,20 @@ jobs:
           path: .venv
           key: ${{ steps.cache-key.outputs.key }}
           restore-keys: |
-            deps-${{ runner.os }}-${{ hashFiles('requirements-dev.txt') }}
+            deps-${{ runner.os }}-${{ hashFiles('**/requirements-dev.txt') }}
+
+      - name: Debug cache key
+        run: |
+          echo "Cache key: ${{ needs.setup.outputs.cache-key }}"
 
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
+
+      - name: Debug cache save
+        run: |
+          echo "Cache saved with key: ${{ steps.cache-key.outputs.key }}"
 
   unit-tests:
     runs-on: ubuntu-latest
@@ -59,13 +67,21 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Debug cache key
+        run: |
+          echo "Cache key: ${{ needs.setup.outputs.cache-key }}"
+
       - name: Restore Python dependencies cache
         uses: actions/cache@v3
         with:
           path: .venv
           key: ${{ needs.setup.outputs.cache-key }}
           restore-keys: |
-            deps-${{ runner.os }}-${{ hashFiles('requirements-dev.txt') }}
+            deps-${{ runner.os }}-${{ hashFiles('**/requirements-dev.txt') }}
+
+      - name: Debug cached dependencies
+        run: |
+          ls -la .venv  # Verify that the cache was restored correctly
 
       - name: Run unit tests with coverage
         run: |
@@ -98,13 +114,17 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Debug cache key
+        run: |
+          echo "Cache key: ${{ needs.setup.outputs.cache-key }}"
+
       - name: Restore Python dependencies cache
         uses: actions/cache@v3
         with:
           path: .venv
           key: ${{ needs.setup.outputs.cache-key }}
           restore-keys: |
-            deps-${{ runner.os }}-${{ hashFiles('requirements-dev.txt') }}
+            deps-${{ runner.os }}-${{ hashFiles('**/requirements-dev.txt') }}
 
       - name: Run integration tests with coverage
         run: |
