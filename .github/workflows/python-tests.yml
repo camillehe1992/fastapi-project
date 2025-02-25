@@ -34,12 +34,12 @@ jobs:
         run: |
           pytest --cov=app --cov-report=term tests/unit/
 
-      - name: Output unit test report to job summary
+      - name: Output coverage report to job summary
         run: |
           echo "### Unit Test Coverage Report" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
           pytest --cov=app --cov-report=term tests/unit/ >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   integration-tests:
     runs-on: ubuntu-latest
@@ -61,9 +61,9 @@ jobs:
         run: |
           pytest --cov=app --cov-report=term tests/integration/
 
-      - name: Output integration test report to job summary
+      - name: Output coverage report to job summary
         run: |
           echo "### Integration Test Coverage Report" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
           pytest --cov=app --cov-report=term tests/integration/ >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
